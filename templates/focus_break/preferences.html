@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Focus Preferences - EduFlow AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-gear"></i> Focus & Break Preferences</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="default_focus_model" class="form-label">Default Focus Model</label>
+                        <select name="default_focus_model" id="default_focus_model" class="form-select">
+                            {% for model in focus_models %}
+                            <option value="{{ model.id }}" {% if model == preference.default_focus_model %}selected{% endif %}>
+                                {{ model.name }} ({{ model.focus_duration }}/{{ model.break_duration }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="daily_study_limit" class="form-label">Daily Study Limit (minutes)</label>
+                        <input type="number" name="daily_study_limit" id="daily_study_limit"
+                               class="form-control" value="{{ preference.daily_study_limit }}" min="60" max="720">
+                        <small class="form-text text-muted">Recommended: 240-480 minutes (4-8 hours)</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="enable_overload_alerts" id="enable_overload_alerts"
+                               class="form-check-input" {% if preference.enable_overload_alerts %}checked{% endif %}>
+                        <label for="enable_overload_alerts" class="form-check-label">
+                            Enable overload alerts
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Preferences
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

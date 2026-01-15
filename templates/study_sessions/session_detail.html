@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Study Session Detail - EduFlow AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Study Session Details</h4>
+            </div>
+            <div class="card-body">
+                <h5>{{ session.event.title }}</h5>
+                <p>
+                    <strong>Date:</strong> {{ session.date|date:"F d, Y" }}<br>
+                    <strong>Time:</strong> {{ session.start_time|time:"g:i A" }}<br>
+                    <strong>Duration:</strong> {{ session.duration_minutes }} minutes<br>
+                    <strong>Status:</strong> <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                </p>
+
+                {% if session.actual_start_time %}
+                <p>
+                    <strong>Actual Start:</strong> {{ session.actual_start_time|date:"g:i A" }}<br>
+                    {% if session.actual_end_time %}
+                    <strong>Actual End:</strong> {{ session.actual_end_time|date:"g:i A" }}<br>
+                    <strong>Actual Duration:</strong> {{ session.actual_duration_minutes }} minutes
+                    {% endif %}
+                </p>
+                {% endif %}
+
+                <hr>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary">Update Session</button>
+                    <a href="{% url 'event_detail' session.event.pk %}" class="btn btn-secondary">Back to Event</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

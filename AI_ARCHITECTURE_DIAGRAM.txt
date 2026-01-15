@@ -1,0 +1,327 @@
+═══════════════════════════════════════════════════════════════════════════
+                    EDUFLOW AI - AI INTEGRATION ARCHITECTURE
+═══════════════════════════════════════════════════════════════════════════
+
+USER INTERFACE LAYER
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Django Templates (HTML)                                                │
+│  ┌───────────────┐  ┌────────────────┐  ┌──────────────────────┐      │
+│  │ Event Create  │  │ Event Detail   │  │ Study Session List   │      │
+│  │   Form        │  │   + AI Plan    │  │  + AI Suggestions    │      │
+│  └───────┬───────┘  └────────┬───────┘  └──────────┬───────────┘      │
+│          │                    │                      │                   │
+└──────────┼────────────────────┼──────────────────────┼──────────────────┘
+           │                    │                      │
+           ▼                    ▼                      ▼
+
+VIEW LAYER (Django Views)
+┌─────────────────────────────────────────────────────────────────────────┐
+│  events/views.py                    study_sessions/views.py             │
+│  ┌──────────────────┐               ┌──────────────────────┐           │
+│  │ event_create()   │──────────────▶│ session_complete()   │           │
+│  │  - Save event    │               │  - Track actual time │           │
+│  │  - Call AI       │               └──────────────────────┘           │
+│  │  - Fallback      │                                                   │
+│  └────────┬─────────┘               ┌──────────────────────┐           │
+│           │                          │ check_replan()       │           │
+│           │                          │  - Detect issues     │           │
+│           │                          │  - Get AI suggestions│           │
+│           │                          └──────────────────────┘           │
+└───────────┼──────────────────────────────────────────────────────────────┘
+            │
+            ▼
+
+AI INTEGRATION LAYER
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ai/event_integration.py                                                │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ generate_ai_study_sessions(event)                         │         │
+│  │  1. Get user preferences (daily limit, focus mode)        │         │
+│  │  2. Call AIService.generate_learning_plan()               │         │
+│  │  3. If success: Create StudySession records               │         │
+│  │  4. If failure: Return [] (caller uses fallback)          │         │
+│  │  5. Format AI tasks with emojis and tips                  │         │
+│  └────────────────────────────┬──────────────────────────────┘         │
+│                                │                                         │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ check_for_replan_triggers(event)                          │         │
+│  │  - Analyze completed sessions                             │         │
+│  │  - Count overruns, skips                                  │         │
+│  │  - Check if event at risk                                 │         │
+│  │  - Return issue_type or None                              │         │
+│  └────────────────────────────┬──────────────────────────────┘         │
+│                                │                                         │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ generate_replan_suggestions(event, issue_type)            │         │
+│  │  - Gather task data (planned vs actual)                   │         │
+│  │  - Call AIService.suggest_replan()                        │         │
+│  │  - Return suggestions for user approval                   │         │
+│  └────────────────────────────┬──────────────────────────────┘         │
+└─────────────────────────────────┼──────────────────────────────────────┘
+                                  ▼
+
+AI SERVICE LAYER
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ai/services.py - AIService class                                       │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ generate_learning_plan(event_title, prep_time, ...)       │         │
+│  │  1. Check cache (24 hour TTL)                             │         │
+│  │  2. Load prompt template                                  │         │
+│  │  3. Format prompt with event data                         │         │
+│  │  4. Call AI provider (_call_ai_provider)                  │         │
+│  │  5. Parse JSON response                                   │         │
+│  │  6. Validate schema (schemas.validate_learning_plan)      │         │
+│  │  7. Cache result                                           │         │
+│  │  8. Return LearningPlan or None                           │         │
+│  └────────────────────────────┬──────────────────────────────┘         │
+│                                │                                         │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ suggest_replan(event, tasks, issue_type, performance)     │         │
+│  │  1. Load re-planning prompt                               │         │
+│  │  2. Format with issue details                             │         │
+│  │  3. Call AI provider                                      │         │
+│  │  4. Parse and return suggestions                          │         │
+│  └────────────────────────────┬──────────────────────────────┘         │
+│                                │                                         │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ _call_ai_provider(prompt)                                 │         │
+│  │  ┌────────────┐  ┌─────────────┐  ┌──────────────┐       │         │
+│  │  │ Mock       │  │ OpenAI      │  │ Anthropic    │       │         │
+│  │  │ (testing)  │  │ GPT-3.5/4   │  │ Claude       │       │         │
+│  │  └────────────┘  └─────────────┘  └──────────────┘       │         │
+│  └───────────────────────────────────────────────────────────┘         │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+
+EXTERNAL AI PROVIDERS
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│  ┌──────────────┐         ┌──────────────┐         ┌──────────────┐    │
+│  │ Mock API     │         │ OpenAI API   │         │ Anthropic API│    │
+│  │              │         │              │         │              │    │
+│  │ Returns      │         │ Chat         │         │ Messages     │    │
+│  │ sample JSON  │         │ Completions  │         │ API          │    │
+│  │              │         │              │         │              │    │
+│  │ No cost      │         │ ~$0.003/plan │         │ ~$0.003/plan │    │
+│  │ Instant      │         │ 1-3 seconds  │         │ 1-2 seconds  │    │
+│  └──────────────┘         └──────────────┘         └──────────────┘    │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+
+DATA VALIDATION LAYER
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ai/schemas.py                                                           │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ validate_learning_plan(plan)                              │         │
+│  │  - Check required fields exist                            │         │
+│  │  - Validate each task                                     │         │
+│  │  - Ensure durations 25-60 minutes                         │         │
+│  │  - Verify task types valid                                │         │
+│  │  - Confirm difficulty/cognitive load valid                │         │
+│  │  - Raise ValueError if invalid                            │         │
+│  └───────────────────────────────────────────────────────────┘         │
+│                                                                           │
+│  TypedDict Schemas:                                                      │
+│  ┌────────────────┐  ┌─────────────────┐  ┌──────────────────┐        │
+│  │ LearningTask   │  │ LearningPlan    │  │ ReplanSuggestion │        │
+│  │  - title       │  │  - goal_summary │  │  - issue_detected│        │
+│  │  - task_type   │  │  - tasks[]      │  │  - suggestions[] │        │
+│  │  - duration    │  │                 │  │                  │        │
+│  │  - difficulty  │  │                 │  │                  │        │
+│  │  - cog_load    │  │                 │  │                  │        │
+│  └────────────────┘  └─────────────────┘  └──────────────────┘        │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+
+DATABASE LAYER (Django ORM)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│  ┌─────────────────┐          ┌──────────────────────┐                  │
+│  │ Event           │          │ StudySession         │                  │
+│  ├─────────────────┤   1:N    ├──────────────────────┤                  │
+│  │ title           │◀─────────│ event (FK)           │                  │
+│  │ event_type      │          │ date                 │                  │
+│  │ event_date      │          │ start_time           │                  │
+│  │ prep_time       │          │ duration_minutes     │                  │
+│  │ subject         │          │ suggested_content    │◀─ AI generated   │
+│  │ description     │          │ status               │                  │
+│  └─────────────────┘          │ actual_duration      │◀─ User tracked   │
+│                                │ notes                │                  │
+│  ┌─────────────────┐          └──────────────────────┘                  │
+│  │ UserPreference  │                                                     │
+│  ├─────────────────┤          ┌──────────────────────┐                  │
+│  │ daily_limit     │          │ FocusSession         │                  │
+│  │ default_model   │          ├──────────────────────┤                  │
+│  │ enable_alerts   │   1:N    │ study_session (FK)   │                  │
+│  └─────────────────┘◀─────────│ start_time           │                  │
+│                                │ end_time             │                  │
+│                                │ duration_minutes     │                  │
+│                                └──────────────────────┘                  │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+CACHING LAYER
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Django Cache Framework                                                  │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ Cache Key: ai_plan_{title}_{date}_{prep_time}            │         │
+│  │ TTL: 24 hours                                             │         │
+│  │ Backend: LocMemCache (development) / Redis (production)   │         │
+│  └───────────────────────────────────────────────────────────┘         │
+│                                                                           │
+│  Benefits:                                                                │
+│  - Reduces API costs by 50-70%                                           │
+│  - Faster response (instant vs 1-3 seconds)                              │
+│  - Resilient to API downtime                                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+LOGGING & MONITORING
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Python Logging                                                          │
+│  ┌───────────────────────────────────────────────────────────┐         │
+│  │ logger.info("Generated plan: 4 tasks, 150 minutes")       │         │
+│  │ logger.error("AI call failed: APIError")                  │         │
+│  │ logger.warning("Cache miss, calling AI provider")         │         │
+│  └───────────────────────────────────────────────────────────┘         │
+│                                                                           │
+│  Metrics Tracked:                                                        │
+│  - AI call success rate                                                  │
+│  - Average response time                                                 │
+│  - Cache hit rate                                                        │
+│  - API costs per user                                                    │
+│  - Task completion rates (AI vs deterministic)                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+                              DATA FLOW EXAMPLES
+═══════════════════════════════════════════════════════════════════════════
+
+EXAMPLE 1: USER CREATES EVENT WITH AI
+───────────────────────────────────────────────────────────────────────────
+
+1. User fills form: "Math Exam", exam type, 7 days, 6 hours prep
+   │
+2. event_create() view saves Event to database
+   │
+3. View calls generate_ai_study_sessions(event)
+   │
+4. Integration layer calls AIService.generate_learning_plan()
+   │
+5. Service checks cache (MISS - first time)
+   │
+6. Service loads prompt template, formats with event data
+   │
+7. Service calls AI provider (OpenAI GPT-3.5)
+   │
+8. AI responds with JSON containing 4 tasks
+   │
+9. Service validates JSON schema (PASS)
+   │
+10. Service caches result (24 hour TTL)
+    │
+11. Integration layer creates 4 StudySession records
+    │
+12. View shows success message: "Event created with 4 AI-powered tasks"
+    │
+13. User sees detailed study plan on event detail page
+
+
+EXAMPLE 2: AI DETECTS OVERRUNNING TASKS
+───────────────────────────────────────────────────────────────────────────
+
+1. User completes 3 sessions, all took 60+ min (planned: 45 min)
+   │
+2. User visits event detail page
+   │
+3. View calls check_for_replan_triggers(event)
+   │
+4. Integration layer analyzes sessions:
+   - Session 1: 45 min planned, 65 min actual (44% over)
+   - Session 2: 45 min planned, 70 min actual (55% over)
+   - Session 3: 45 min planned, 62 min actual (37% over)
+   - Average: 45% overrun
+   │
+5. Trigger detected: "tasks_overrunning"
+   │
+6. View calls generate_replan_suggestions(event, "tasks_overrunning")
+   │
+7. Integration layer calls AIService.suggest_replan()
+   │
+8. AI responds with suggestion: "Split 45-min tasks into 30-min tasks"
+   │
+9. View displays alert box with suggestion
+   │
+10. User clicks "Apply Suggestions"
+    │
+11. System splits remaining tasks into smaller chunks
+    │
+12. User completes shorter tasks successfully
+
+
+EXAMPLE 3: AI CALL FAILS (FALLBACK WORKS)
+───────────────────────────────────────────────────────────────────────────
+
+1. User creates event "Physics Quiz", 5 days, 4 hours
+   │
+2. event_create() view calls generate_ai_study_sessions(event)
+   │
+3. AIService.generate_learning_plan() is called
+   │
+4. Service calls OpenAI API
+   │
+5. API ERROR: Rate limit exceeded / Network timeout
+   │
+6. Service catches exception, logs error
+   │
+7. Service returns None (graceful failure)
+   │
+8. Integration layer returns empty list []
+   │
+9. View detects empty list, calls deterministic fallback:
+   generate_study_sessions(event)
+   │
+10. Deterministic function creates sessions using existing logic
+    │
+11. User sees message: "Event created with automatic scheduling"
+    │
+12. System works perfectly, user unaware of AI failure
+
+
+═══════════════════════════════════════════════════════════════════════════
+                              KEY PRINCIPLES
+═══════════════════════════════════════════════════════════════════════════
+
+1. SEPARATION OF CONCERNS
+   - AI logic isolated in ai/ module
+   - Not mixed with models, views, or signals
+   - Clean integration through helper functions
+
+2. FAIL-SAFE BY DEFAULT
+   - AI failure → deterministic fallback
+   - Invalid JSON → error logged, fallback used
+   - API timeout → graceful degradation
+   - User never sees broken experience
+
+3. USER CONTROL
+   - AI suggests, never executes
+   - User can regenerate, edit, or ignore
+   - Re-planning requires explicit approval
+   - Opt-out available
+
+4. COST CONTROL
+   - Aggressive 24-hour caching
+   - Rate limiting (10 calls/hour/user)
+   - Cheap models (GPT-3.5, Claude Haiku)
+   - Event-based (not continuous)
+
+5. PREDICTABLE OUTPUTS
+   - Strict JSON schemas
+   - Validation rejects invalid responses
+   - No creative/unpredictable behavior
+   - Educational best practices enforced
+
+═══════════════════════════════════════════════════════════════════════════

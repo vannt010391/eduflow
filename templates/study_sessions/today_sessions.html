@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Today's Sessions - EduFlow AI{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-calendar-day"></i> Today's Study Sessions</h1>
+<p class="lead">{{ today|date:"l, F d, Y" }}</p>
+
+{% if sessions %}
+<div class="row">
+    {% for session in sessions %}
+    <div class="col-md-6 mb-3">
+        <div class="card session-card {% if session.status == 'completed' %}completed{% elif session.is_overdue %}overdue{% endif %}">
+            <div class="card-body">
+                <h5>{{ session.event.title }}</h5>
+                <p class="mb-2">
+                    <i class="bi bi-clock"></i> {{ session.start_time|time:"g:i A" }}<br>
+                    <i class="bi bi-hourglass"></i> {{ session.duration_minutes }} minutes<br>
+                    <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                </p>
+                <div class="btn-group btn-group-sm">
+                    {% if session.status == 'pending' %}
+                    <a href="{% url 'session_start' session.pk %}" class="btn btn-success">Start</a>
+                    <a href="{% url 'session_skip' session.pk %}" class="btn btn-warning">Skip</a>
+                    {% elif session.status == 'in_progress' %}
+                    <a href="{% url 'session_complete' session.pk %}" class="btn btn-primary">Complete</a>
+                    {% endif %}
+                    <a href="{% url 'study_session_detail' session.pk %}" class="btn btn-outline-info">Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-calendar-x"></i>
+    <p>No study sessions scheduled for today</p>
+    <a href="{% url 'event_create' %}" class="btn btn-primary">Create an Event</a>
+</div>
+{% endif %}
+{% endblock %}

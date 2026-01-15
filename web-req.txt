@@ -1,0 +1,218 @@
+EduFlow AI – Web Application Requirements
+
+Technology Stack: Django (Backend), SQLite (Database), HTML/CSS/JS (Frontend)
+Target Users: Students (primary), Teachers/Admin (future extension)
+Platform: Web Application (Desktop-first, responsive)
+
+1. Product Overview
+
+EduFlow AI is a smart educational planning web application designed to help students manage academic events and optimize their focus–break rhythm to improve learning effectiveness and reduce mental overload.
+Unlike traditional calendar or reminder tools, EduFlow AI transforms each academic event (exam, deadline, presentation, extracurricular activity) into a structured preparation plan with distributed study sessions and intelligent break recommendations.
+
+Core Value Proposition:
+“Not only managing time, but managing learning energy.”
+
+2. Core Functional Pillars
+2.1 Event Edu Planner (Academic Event Management)
+Purpose:
+Help users plan, prepare, and complete academic events without last-minute cramming.
+
+2.1.1 Event Management
+Users can create, edit, delete academic events:
+Exam
+Quiz/Test
+Assignment deadline
+Presentation
+Extracurricular activity
+
+Required event fields:
+Event title
+Event type
+Event date & time
+Subject / category
+Priority level (low / medium / high)
+Estimated total preparation time (hours)
+Description (optional)
+
+2.1.2 Automatic Preparation Schedule Generation
+When an event is created, the system automatically:
+Calculates remaining days until the event
+Splits total preparation time into multiple study sessions
+Distributes sessions evenly across available days
+Each generated study session includes:
+Date
+Start time (default or user-defined)
+Duration (e.g., 25–50 minutes)
+Suggested content/task (user editable)
+
+2.1.3 Progress Tracking & Deadline Risk Warning
+Users can mark study sessions as:
+Completed
+Skipped
+Postponed
+
+System tracks:
+Percentage of completion per event
+Remaining workload
+
+Visual warnings when:
+Too many sessions are incomplete
+Event date is approaching with low completion rate
+
+2.2 FocusBreak AI (Focus & Rest Optimization)
+
+Purpose:
+Optimize learning efficiency by managing focus duration and rest timing.
+
+2.2.1 Study Session Tracking
+Each study session records:
+Actual start time
+Actual end time
+Effective focus duration
+anual start/stop timer for study sessions
+
+2.2.2 Intelligent Break Recommendation
+Default focus models:
+Pomodoro (25/5)
+Extended focus (45/10)
+Deep work (60/15)
+
+System suggests:
+When to take a break
+Recommended break length
+Break suggestions adapt based on:
+Consecutive sessions
+Total daily study time
+
+2.2.3 Overload Prevention
+
+Alerts when:
+A single session exceeds safe focus duration
+Total daily focus time exceeds threshold
+Encourages sustainable study habits
+
+3. Analytics & Effectiveness Measurement
+
+The system must provide measurable learning outcomes.
+
+3.1 User Metrics Dashboard
+
+Display:
+Daily average focused study time
+Total study time per week
+Number of completed study sessions
+Event completion rate
+
+3.2 Effectiveness Indicators
+
+Percentage of events completed on time
+Reduction in overlong study sessions
+Consistency of daily study habits
+
+4. User Roles (Initial Phase)
+4.1 Student (Primary Role)
+
+Full access to:
+Event creation and planning
+FocusBreak tracking
+Analytics dashboard
+
+(Teacher/Admin roles are out of scope for initial version but database design should allow future extension.)
+
+5. System Architecture Requirements
+5.1 Backend (Django)
+
+Django REST-style architecture (even if frontend is server-rendered)
+
+Core apps:
+users
+events
+study_sessions
+focus_break
+analytics
+
+Authentication:
+
+Django built-in auth (username/email + password)
+
+5.2 Database (SQLite)
+
+Use SQLite for MVP simplicity
+
+Core models:
+
+User
+Event
+StudySession
+FocusSession
+BreakSession
+Relationships:
+
+One User → Many Events
+
+One Event → Many StudySessions
+
+5.3 Frontend
+
+Server-rendered Django templates OR lightweight JS (no SPA required)
+
+Key pages:
+
+Dashboard
+
+Event list & event detail
+Study session timer
+Analytics overview
+
+6. Non-Functional Requirements
+6.1 Usability
+
+Minimal cognitive load
+Clear daily action list (“What should I study today?”)
+Mobile-responsive layout
+
+6.2 Performance
+
+Must support at least:
+
+1,000 users
+
+10,000 events
+
+100,000 study sessions
+
+6.3 Data Integrity
+
+Automatic recalculation when:
+Event date changes
+Preparation time changes
+Prevent data loss on session interruption
+
+7. MVP Scope (Phase 1)
+
+Included:
+User authentication
+Event creation & auto scheduling
+Study session timer
+Break recommendations (rule-based)
+Basic analytics dashboard
+
+Excluded:
+AI personalization (ML-based)
+Teacher/admin dashboards
+Mobile app
+External calendar integration
+
+8. Future Expansion (Not for MVP)
+AI-based adaptive focus modeling
+Teacher dashboards
+LMS integration
+Mobile application
+Cloud database (PostgreSQL)
+
+9. Success Criteria
+EduFlow AI is considered successful if:
+Users can clearly see daily study tasks
+Events are completed on time more frequently
+Average focus session length becomes more balanced
+Users report reduced last-minute studying behavior

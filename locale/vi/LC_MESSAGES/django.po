@@ -1,0 +1,459 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: EduFlow AI 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-15 10:00+0700\n"
+"PO-Revision-Date: 2026-01-15 10:00+0700\n"
+"Last-Translator: EduFlow Team\n"
+"Language-Team: Vietnamese\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# Navigation Menu
+msgid "Dashboard"
+msgstr "Bảng điều khiển"
+
+msgid "Events"
+msgstr "Sự kiện"
+
+msgid "Today's Tasks"
+msgstr "Nhiệm vụ hôm nay"
+
+msgid "Focus Timer"
+msgstr "Đồng hồ tập trung"
+
+msgid "Analytics"
+msgstr "Phân tích"
+
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+msgid "Profile"
+msgstr "Hồ sơ"
+
+msgid "Preferences"
+msgstr "Tùy chọn"
+
+msgid "Logout"
+msgstr "Đăng xuất"
+
+msgid "Login"
+msgstr "Đăng nhập"
+
+msgid "Register"
+msgstr "Đăng ký"
+
+# Event Types
+msgid "Exam"
+msgstr "Kỳ thi"
+
+msgid "Quiz/Test"
+msgstr "Kiểm tra"
+
+msgid "Assignment Deadline"
+msgstr "Hạn nộp bài"
+
+msgid "Presentation"
+msgstr "Thuyết trình"
+
+msgid "Extracurricular Activity"
+msgstr "Hoạt động ngoại khóa"
+
+# Priority Levels
+msgid "Low"
+msgstr "Thấp"
+
+msgid "Medium"
+msgstr "Trung bình"
+
+msgid "High"
+msgstr "Cao"
+
+# Session Status
+msgid "Pending"
+msgstr "Chờ xử lý"
+
+msgid "Completed"
+msgstr "Hoàn thành"
+
+msgid "Skipped"
+msgstr "Đã bỏ qua"
+
+msgid "Postponed"
+msgstr "Đã hoãn"
+
+msgid "In Progress"
+msgstr "Đang thực hiện"
+
+# Common Actions
+msgid "Create"
+msgstr "Tạo mới"
+
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+msgid "Delete"
+msgstr "Xóa"
+
+msgid "Save"
+msgstr "Lưu"
+
+msgid "Cancel"
+msgstr "Hủy"
+
+msgid "Submit"
+msgstr "Gửi"
+
+msgid "Back"
+msgstr "Quay lại"
+
+msgid "View"
+msgstr "Xem"
+
+msgid "Update"
+msgstr "Cập nhật"
+
+# Event Management
+msgid "Create New Event"
+msgstr "Tạo sự kiện mới"
+
+msgid "Edit Event"
+msgstr "Chỉnh sửa sự kiện"
+
+msgid "Delete Event"
+msgstr "Xóa sự kiện"
+
+msgid "Event Details"
+msgstr "Chi tiết sự kiện"
+
+msgid "Event List"
+msgstr "Danh sách sự kiện"
+
+msgid "Title"
+msgstr "Tiêu đề"
+
+msgid "Event Type"
+msgstr "Loại sự kiện"
+
+msgid "Event Date"
+msgstr "Ngày sự kiện"
+
+msgid "Subject"
+msgstr "Môn học"
+
+msgid "Priority"
+msgstr "Ưu tiên"
+
+msgid "Estimated Preparation Time"
+msgstr "Thời gian chuẩn bị dự kiến"
+
+msgid "Description"
+msgstr "Mô tả"
+
+msgid "Completion Percentage"
+msgstr "Phần trăm hoàn thành"
+
+msgid "Days Until Event"
+msgstr "Số ngày còn lại"
+
+msgid "At Risk"
+msgstr "Có rủi ro"
+
+# Study Sessions
+msgid "Study Sessions"
+msgstr "Buổi học"
+
+msgid "Today's Sessions"
+msgstr "Buổi học hôm nay"
+
+msgid "Upcoming Sessions"
+msgstr "Buổi học sắp tới"
+
+msgid "Past Sessions"
+msgstr "Buổi học đã qua"
+
+msgid "Start Session"
+msgstr "Bắt đầu buổi học"
+
+msgid "Complete Session"
+msgstr "Hoàn thành buổi học"
+
+msgid "Skip Session"
+msgstr "Bỏ qua buổi học"
+
+msgid "Date"
+msgstr "Ngày"
+
+msgid "Start Time"
+msgstr "Thời gian bắt đầu"
+
+msgid "Duration"
+msgstr "Thời lượng"
+
+msgid "Status"
+msgstr "Trạng thái"
+
+msgid "minutes"
+msgstr "phút"
+
+msgid "hours"
+msgstr "giờ"
+
+# Focus Timer
+msgid "Choose a Focus Model"
+msgstr "Chọn mô hình tập trung"
+
+msgid "Start"
+msgstr "Bắt đầu"
+
+msgid "End Session"
+msgstr "Kết thúc buổi"
+
+msgid "Active Focus Session"
+msgstr "Buổi tập trung đang hoạt động"
+
+msgid "Started"
+msgstr "Đã bắt đầu"
+
+msgid "Model"
+msgstr "Mô hình"
+
+msgid "Today's Focus Time"
+msgstr "Thời gian tập trung hôm nay"
+
+# Focus Models
+msgid "Pomodoro (25/5)"
+msgstr "Pomodoro (25/5)"
+
+msgid "Extended Focus (45/10)"
+msgstr "Tập trung kéo dài (45/10)"
+
+msgid "Deep Work (60/15)"
+msgstr "Làm việc sâu (60/15)"
+
+# Analytics Dashboard
+msgid "Analytics Dashboard"
+msgstr "Bảng phân tích"
+
+msgid "Track your study effectiveness and progress"
+msgstr "Theo dõi hiệu quả học tập và tiến độ của bạn"
+
+msgid "Sessions Today"
+msgstr "Buổi học hôm nay"
+
+msgid "of"
+msgstr "của"
+
+msgid "scheduled"
+msgstr "đã lên lịch"
+
+msgid "Hours Today"
+msgstr "Giờ học hôm nay"
+
+msgid "This Week"
+msgstr "Tuần này"
+
+msgid "sessions"
+msgstr "buổi học"
+
+msgid "Consistency"
+msgstr "Tính nhất quán"
+
+msgid "Last 7 days"
+msgstr "7 ngày qua"
+
+msgid "Event Statistics"
+msgstr "Thống kê sự kiện"
+
+msgid "Total Events"
+msgstr "Tổng số sự kiện"
+
+msgid "Upcoming Events"
+msgstr "Sự kiện sắp tới"
+
+msgid "Events At Risk"
+msgstr "Sự kiện có rủi ro"
+
+msgid "Completion Rate"
+msgstr "Tỷ lệ hoàn thành"
+
+msgid "completed on time"
+msgstr "hoàn thành đúng hạn"
+
+msgid "Effectiveness Metrics"
+msgstr "Các chỉ số hiệu quả"
+
+msgid "Avg Daily Study Time"
+msgstr "Thời gian học trung bình mỗi ngày"
+
+msgid "Avg Session Duration"
+msgstr "Thời lượng buổi học trung bình"
+
+msgid "Consistency Score"
+msgstr "Điểm nhất quán"
+
+msgid "Overlong Sessions (>90 min)"
+msgstr "Buổi học quá dài (>90 phút)"
+
+msgid "Last 7 Days Activity"
+msgstr "Hoạt động 7 ngày qua"
+
+msgid "Day"
+msgstr "Ngày"
+
+msgid "Focus Minutes"
+msgstr "Phút tập trung"
+
+msgid "Hours"
+msgstr "Giờ"
+
+# Home Dashboard
+msgid "Welcome to EduFlow AI"
+msgstr "Chào mừng đến với EduFlow AI"
+
+msgid "Today's Overview"
+msgstr "Tổng quan hôm nay"
+
+msgid "Quick Actions"
+msgstr "Hành động nhanh"
+
+msgid "Recent Activity"
+msgstr "Hoạt động gần đây"
+
+msgid "No sessions scheduled for today"
+msgstr "Không có buổi học nào được lên lịch cho hôm nay"
+
+msgid "No upcoming events"
+msgstr "Không có sự kiện sắp tới"
+
+msgid "No past sessions"
+msgstr "Không có buổi học nào đã qua"
+
+# User Authentication
+msgid "Username"
+msgstr "Tên đăng nhập"
+
+msgid "Password"
+msgstr "Mật khẩu"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Confirm Password"
+msgstr "Xác nhận mật khẩu"
+
+msgid "Remember me"
+msgstr "Ghi nhớ đăng nhập"
+
+msgid "Forgot password?"
+msgstr "Quên mật khẩu?"
+
+msgid "Don't have an account?"
+msgstr "Chưa có tài khoản?"
+
+msgid "Already have an account?"
+msgstr "Đã có tài khoản?"
+
+# Preferences
+msgid "Focus & Break Preferences"
+msgstr "Tùy chọn tập trung & nghỉ ngơi"
+
+msgid "Default Focus Model"
+msgstr "Mô hình tập trung mặc định"
+
+msgid "Daily Study Limit (minutes)"
+msgstr "Giới hạn học mỗi ngày (phút)"
+
+msgid "Recommended"
+msgstr "Được đề xuất"
+
+msgid "Enable overload alerts"
+msgstr "Bật cảnh báo quá tải"
+
+msgid "Save Preferences"
+msgstr "Lưu tùy chọn"
+
+# Messages
+msgid "Event created successfully"
+msgstr "Đã tạo sự kiện thành công"
+
+msgid "Event updated successfully"
+msgstr "Đã cập nhật sự kiện thành công"
+
+msgid "Event deleted successfully"
+msgstr "Đã xóa sự kiện thành công"
+
+msgid "Session marked as completed"
+msgstr "Đã đánh dấu buổi học là hoàn thành"
+
+msgid "Session skipped"
+msgstr "Đã bỏ qua buổi học"
+
+msgid "Preferences saved successfully"
+msgstr "Đã lưu tùy chọn thành công"
+
+msgid "You've reached your daily study limit. Take a longer break!"
+msgstr "Bạn đã đạt giới hạn học tập hàng ngày. Hãy nghỉ ngơi lâu hơn!"
+
+msgid "Warning: Approaching daily study limit"
+msgstr "Cảnh báo: Sắp đạt giới hạn học tập hàng ngày"
+
+# Footer
+msgid "Smart Educational Planning"
+msgstr "Lập kế hoạch giáo dục thông minh"
+
+# Home Dashboard
+msgid "Welcome"
+msgstr "Chào mừng"
+
+msgid "Here's what you should focus on today"
+msgstr "Đây là những gì bạn cần tập trung hôm nay"
+
+msgid "complete"
+msgstr "hoàn thành"
+
+msgid "days remaining"
+msgstr "ngày còn lại"
+
+msgid "Active Focus Session"
+msgstr "Buổi tập trung đang hoạt động"
+
+msgid "Started at"
+msgstr "Đã bắt đầu lúc"
+
+msgid "Go to Timer"
+msgstr "Đến đồng hồ"
+
+msgid "Today's Study Sessions"
+msgstr "Buổi học hôm nay"
+
+msgid "View All"
+msgstr "Xem tất cả"
+
+msgid "View All Events"
+msgstr "Xem tất cả sự kiện"
+
+msgid "Start Focus Session"
+msgstr "Bắt đầu buổi tập trung"
+
+msgid "View Analytics"
+msgstr "Xem phân tích"
+
+msgid "All Sessions"
+msgstr "Tất cả buổi học"
+
+msgid "days"
+msgstr "ngày"
+
+# Pluralization
+msgid "You have %(counter)s event at risk of not being completed on time:"
+msgid_plural "You have %(counter)s events at risk of not being completed on time:"
+msgstr[0] "Bạn có %(counter)s sự kiện có nguy cơ không hoàn thành đúng hạn:"

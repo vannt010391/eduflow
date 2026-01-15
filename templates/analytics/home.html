@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %} - EduFlow AI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5">
+            <i class="bi bi-house-door"></i> {% trans "Welcome" %}, {{ user.username }}!
+        </h1>
+        <p class="lead text-muted">{% trans "Here's what you should focus on today" %}</p>
+    </div>
+</div>
+
+<!-- Today's Focus Time -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3><i class="bi bi-clock-history"></i> {% trans "Today's Focus Time" %}</h3>
+                <p class="display-4 mb-0">{{ today_focus_minutes }} {% trans "minutes" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- At Risk Events Alert -->
+{% if at_risk_events %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="alert alert-danger">
+            <h5><i class="bi bi-exclamation-triangle-fill"></i> {% trans "Events At Risk" %}!</h5>
+            <p>{% blocktrans count counter=at_risk_events|length %}You have {{ counter }} event at risk of not being completed on time:{% plural %}You have {{ counter }} events at risk of not being completed on time:{% endblocktrans %}</p>
+            <ul class="mb-0">
+                {% for event in at_risk_events %}
+                <li>
+                    <a href="{% url 'event_detail' event.pk %}" class="alert-link">{{ event.title }}</a>
+                    - {{ event.completion_percentage }}% {% trans "complete" %}, {{ event.days_until_event }} {% trans "days remaining" %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Active Focus Session -->
+{% if active_focus %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-success">
+            <div class="card-body">
+                <h5><i class="bi bi-stopwatch text-success"></i> {% trans "Active Focus Session" %}</h5>
+                <p>{% trans "Started at" %}: {{ active_focus.start_time|time:"g:i A" }}</p>
+                <a href="{% url 'focus_timer' %}" class="btn btn-success">
+                    <i class="bi bi-arrow-right-circle"></i> {% trans "Go to Timer" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Today's Study Sessions -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> {% trans "Today's Study Sessions" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if today_sessions %}
+                <div class="list-group list-group-flush">
+                    {% for session in today_sessions %}
+                    <div class="list-group-item session-card {% if session.status == 'completed' %}completed{% elif session.is_overdue %}overdue{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ session.event.title }}</h6>
+                                <p class="mb-1 text-muted">
+                                    <i class="bi bi-clock"></i> {{ session.start_time|time:"g:i A" }}
+                                    ({{ session.duration_minutes }} min)
+                                </p>
+                                <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                            </div>
+                            <div>
+                                {% if session.status == 'pending' %}
+                                <a href="{% url 'session_start' session.pk %}" class="btn btn-sm btn-primary">{% trans "Start" %}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'today_sessions' %}" class="btn btn-outline-info">{% trans "View All" %}</a>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>{% trans "No sessions scheduled for today" %}</p>
+                    <a href="{% url 'event_create' %}" class="btn btn-primary">{% trans "Create Event" %}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> {% trans "Upcoming Events" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                <div class="list-group list-group-flush">
+                    {% for event in upcoming_events %}
+                    <div class="list-group-item event-card {% if event.is_at_risk %}at-risk{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <p class="mb-1 text-muted">
+                                    <i class="bi bi-calendar"></i> {{ event.event_date|date:"M d, Y g:i A" }}
+                                </p>
+                                <span class="badge badge-priority-{{ event.priority }}">{{ event.get_priority_display }}</span>
+                                <span class="badge bg-info">{{ event.get_event_type_display }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="days-remaining text-primary">{{ event.days_until_event }} {% trans "days" %}</span>
+                                <div class="progress mt-2" style="width: 100px;">
+                                    <div class="progress-bar bg-success" style="width: {{ event.completion_percentage }}%">
+                                        {{ event.completion_percentage }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'event_list' %}" class="btn btn-outline-warning">{% trans "View All Events" %}</a>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-plus"></i>
+                    <p>{% trans "No upcoming events" %}</p>
+                    <a href="{% url 'event_create' %}" class="btn btn-primary">{% trans "Create Event" %}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> {% trans "Quick Actions" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'event_create' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-plus-circle"></i><br>{% trans "Create Event" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'focus_timer' %}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-play-circle"></i><br>{% trans "Start Focus Session" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'analytics_dashboard' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-graph-up"></i><br>{% trans "View Analytics" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'study_session_list' %}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-list-ul"></i><br>{% trans "All Sessions" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

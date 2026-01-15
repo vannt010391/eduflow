@@ -1,0 +1,271 @@
+EduFlow AI – AI Improvement Requirements (for Claude)
+Purpose of This Document
+
+This document defines how AI is used to improve EduFlow AI, what AI must do, what AI must not do, and how AI integrates with the existing Django-based system.
+
+AI is an augmentation layer, not the core executor.
+
+1. Design Principle (NON-NEGOTIABLE)
+
+AI in EduFlow AI follows this rule:
+
+AI plans and advises.
+Deterministic logic executes and enforces.
+The user always retains control.
+
+AI output must be:
+
+Explainable
+
+Structured
+
+Optional (user can edit or ignore)
+
+2. AI Scope Overview
+
+AI is used in three controlled scenarios only:
+
+Event → Learning Plan Decomposition
+
+Task-Level Time & Focus Suggestions
+
+Adaptive Re-Planning (Triggered, Not Continuous)
+
+AI is never used for:
+
+Real-time timer control
+
+Calendar conflict resolution
+
+Enforcing breaks
+
+Automatically modifying schedules without user approval
+
+3. AI Use Case #1: Event → Learning Plan Generation
+Trigger
+
+When a user creates or updates an academic event
+
+Or when user explicitly clicks “Generate AI Plan”
+
+Input to AI
+
+Structured input only:
+
+Event title
+
+Event type
+
+Event date
+
+Total preparation time (hours)
+
+User-written description
+
+User preferences (focus mode, daily limit)
+
+AI Responsibility
+
+AI must:
+
+Understand the learning goal
+
+Decompose the goal into atomic learning tasks
+
+Estimate reasonable learning duration per task
+
+Classify task difficulty and cognitive load
+
+AI must NOT:
+
+Assign calendar dates
+
+Decide number of sessions per day
+
+Override user limits
+
+Required AI Output (STRICT SCHEMA)
+
+AI output must be valid JSON and match this structure:
+
+{
+  "goal_summary": "string",
+  "tasks": [
+    {
+      "title": "string",
+      "task_type": "concept_review | practice | deep_practice | revision | mock_test",
+      "suggested_duration_minutes": 25,
+      "difficulty": "low | medium | high",
+      "cognitive_load": "low | medium | high",
+      "notes": "optional string"
+    }
+  ]
+}
+
+
+Constraints:
+
+No task longer than 60 minutes
+
+Prefer 25–45 minute tasks
+
+Tasks must be independent and reorderable
+
+4. AI Use Case #2: Task ↔ Time Tracker Integration
+Concept
+
+Every AI-generated task must be directly actionable and linked to a timer.
+
+Behavior
+
+When a user opens a task:
+
+System shows:
+
+Task objective
+
+AI-suggested duration
+
+Suggested focus mode (Pomodoro / Extended / Deep Work)
+
+User clicks Start
+
+Timer starts with:
+
+Pre-filled suggested duration
+
+Manual stop allowed
+
+Data Captured
+
+Suggested duration vs actual duration
+
+Completion status
+
+Overrun or underrun delta
+
+AI does NOT:
+
+Start or stop timers
+
+Force breaks
+
+Block user actions
+
+5. AI Use Case #3: Adaptive Re-Planning (Improvement Loop)
+Trigger Conditions (Rule-Based)
+
+AI is invoked only if:
+
+User repeatedly exceeds suggested durations
+
+User skips multiple tasks
+
+Event is flagged “at risk”
+
+AI Responsibility
+
+AI may suggest:
+
+Splitting tasks into smaller units
+
+Reducing task difficulty per session
+
+Increasing revision frequency
+
+Adjusting recommended focus mode
+
+Output
+
+AI returns suggestions only, never automatic changes.
+
+Example:
+
+{
+  "issue_detected": "tasks_overrunning",
+  "suggestions": [
+    {
+      "action": "split_task",
+      "task_title": "Solve word problems",
+      "new_duration_minutes": 30
+    }
+  ]
+}
+
+
+User must explicitly approve changes.
+
+6. AI Architecture Requirements (Django)
+Separation of Concerns (MANDATORY)
+
+AI logic must live in a dedicated module:
+
+ai/
+ ├── prompts/
+ │   ├── plan_generation.txt
+ │   ├── replanning.txt
+ ├── schemas.py        # JSON validation
+ ├── services.py       # AI calls + safety checks
+
+
+AI calls must NOT be placed in:
+
+models.py
+
+views.py
+
+signals.py
+
+7. Safety, Stability, and Cost Control
+
+AI calls must be:
+
+Event-based, not continuous
+
+Cached per event unless user regenerates
+
+Logged with input/output for debugging
+
+If AI fails:
+
+System falls back to deterministic scheduling
+
+User sees a clear, non-blocking message
+
+8. Metrics for AI Effectiveness
+
+The system must be able to measure:
+
+Task completion rate (AI vs non-AI)
+
+Average time overrun per task
+
+Event deadline success rate
+
+Reduction in overlong focus sessions
+
+AI features should be adjustable based on these metrics.
+
+9. Success Criteria
+
+This AI improvement is successful if:
+
+Users understand what to study each day
+
+Tasks feel achievable, not overwhelming
+
+Timers align with real cognitive limits
+
+Fewer last-minute study spikes occur
+
+10. Final Instruction to Claude
+
+When implementing AI features:
+
+Prefer structured outputs over creativity
+
+Prefer predictability over “smartness”
+
+Always preserve user agency
+
+Never break deterministic core logic

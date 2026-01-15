@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Study Sessions - EduFlow AI{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-list-check"></i> Study Sessions</h1>
+
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Upcoming Sessions</h5>
+    </div>
+    <div class="card-body">
+        {% if upcoming_sessions %}
+        <div class="list-group">
+            {% for session in upcoming_sessions %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6>{{ session.event.title }}</h6>
+                        <p class="mb-1 text-muted">
+                            {{ session.date|date:"M d, Y" }} at {{ session.start_time|time:"g:i A" }}
+                            ({{ session.duration_minutes }} min)
+                        </p>
+                        <span class="badge bg-secondary">{{ session.get_status_display }}</span>
+                    </div>
+                    <div>
+                        <a href="{% url 'study_session_detail' session.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No upcoming sessions</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Past Sessions</h5>
+    </div>
+    <div class="card-body">
+        {% if past_sessions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in past_sessions %}
+                    <tr>
+                        <td>{{ session.event.title }}</td>
+                        <td>{{ session.date|date:"M d, Y" }}</td>
+                        <td>{{ session.duration_minutes }} min</td>
+                        <td><span class="badge bg-secondary">{{ session.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No past sessions</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

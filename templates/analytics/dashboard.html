@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - EduFlow AI{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-graph-up"></i> Analytics Dashboard</h1>
+<p class="lead">Track your study effectiveness and progress</p>
+
+<!-- Daily Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-value">{{ today_completed }}</div>
+                <div class="stat-label">Sessions Today</div>
+                <small class="text-muted">of {{ today_total }} scheduled</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-value">{{ today_focus_hours }}</div>
+                <div class="stat-label">Hours Today</div>
+                <small class="text-muted">{{ today_focus_minutes }} minutes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-value">{{ week_completed }}</div>
+                <div class="stat-label">This Week</div>
+                <small class="text-muted">of {{ week_total }} sessions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="stat-value">{{ consistency_score }}%</div>
+                <div class="stat-label">Consistency</div>
+                <small class="text-muted">Last 7 days</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Statistics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Event Statistics</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total Events:</strong> {{ total_events }}</p>
+                <p><strong>Upcoming Events:</strong> {{ upcoming_events }}</p>
+                <p><strong>Events At Risk:</strong> {{ at_risk_events|length }}</p>
+                {% if total_past_events > 0 %}
+                <p><strong>Completion Rate:</strong> {{ on_time_percentage }}%
+                    ({{ events_on_time }}/{{ total_past_events }} completed on time)</p>
+                <div class="progress">
+                    <div class="progress-bar bg-success" style="width: {{ on_time_percentage }}%">
+                        {{ on_time_percentage }}%
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Effectiveness Metrics</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Avg Daily Study Time:</strong> {{ avg_daily_hours }} hours</p>
+                <p><strong>Avg Session Duration:</strong> {{ avg_session_duration }} minutes</p>
+                <p><strong>Consistency Score:</strong> {{ consistency_score }}%</p>
+                <p><strong>Overlong Sessions (&gt;90 min):</strong> {{ overlong_sessions }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Weekly Activity Chart (placeholder) -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Last 7 Days Activity</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Focus Minutes</th>
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day_label, minutes in daily_data %}
+                    <tr>
+                        <td>{{ day_label }}</td>
+                        <td>{{ minutes }}</td>
+                        <td>{{ minutes|floatformat:0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Events at Risk -->
+{% if at_risk_events %}
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Events At Risk</h5>
+    </div>
+    <div class="card-body">
+        <div class="list-group">
+            {% for event in at_risk_events %}
+            <a href="{% url 'event_detail' event.pk %}" class="list-group-item list-group-item-action">
+                <h6>{{ event.title }}</h6>
+                <p class="mb-1">{{ event.days_until_event }} days remaining - {{ event.completion_percentage }}% complete</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
