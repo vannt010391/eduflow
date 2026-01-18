@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Upload Diagnostic Test" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        {% trans "Upload Diagnostic Test" %}
+                    </h4>
+                    <small>{% trans "For event:" %} {{ event.title }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">{% trans "Test Title" %}</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="title"
+                                name="title"
+                                value="Diagnostic Test - {{ event.title }}"
+                                required>
+                            <div class="form-text">{% trans "Give your diagnostic test a descriptive title" %}</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="pdf_file" class="form-label fw-bold">
+                                {% trans "Upload PDF (Optional)" %}
+                            </label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="pdf_file"
+                                name="pdf_file"
+                                accept=".pdf">
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i>
+                                {% trans "Upload a PDF of your test if available. You can add questions manually in the next step." %}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-lightbulb"></i>
+                            <strong>{% trans "What happens next?" %}</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>{% trans "Add questions and answers manually" %}</li>
+                                <li>{% trans "Mark correct/incorrect answers" %}</li>
+                                <li>{% trans "AI will analyze error patterns" %}</li>
+                                <li>{% trans "Get personalized study session suggestions" %}</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-upload"></i>
+                                {% trans "Create Test" %}
+                            </button>
+                            <a href="{% url 'event_detail' event.id %}" class="btn btn-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

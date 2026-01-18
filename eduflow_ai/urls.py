@@ -19,8 +19,12 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf.urls.i18n import i18n_patterns
 
+# Import test view
+from test_language_view import test_language_view
+
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    path('test-lang/', test_language_view),  # Test view - remove after debugging
 ]
 
 urlpatterns += i18n_patterns(
@@ -31,5 +35,7 @@ urlpatterns += i18n_patterns(
     path('events/', include('events.urls')),
     path('sessions/', include('study_sessions.urls')),
     path('focus/', include('focus_break.urls')),
+    path('emotional/', include('emotional_state.urls')),
+    path('diagnostics/', include('diagnostics.urls')),
     prefix_default_language=False,
 )

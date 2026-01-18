@@ -111,9 +111,11 @@ def _create_sessions_from_plan(
     # Calculate scheduling parameters
     days_until_event = (event.event_date.date() - timezone.now().date()).days
 
+    # If event is in the past or today, schedule sessions for upcoming days anyway
+    # This ensures users can still benefit from AI-generated study plans
     if days_until_event <= 0:
-        logger.warning(f"Event '{event.title}' is today or in the past, cannot schedule sessions")
-        return []
+        logger.info(f"Event '{event.title}' is today or in the past, scheduling sessions for next 7 days")
+        days_until_event = 7  # Default to 7 days for planning
 
     # Get user's daily study limit
     try:
@@ -225,7 +227,7 @@ def _format_task_content(
         Formatted content string
     """
     content_parts = [
-        f"📚 Task {task_number}/{total_tasks}: {task['title']}",
+        f"Task {task_number}/{total_tasks}: {task['title']}",
         f"",
         f"Type: {task['task_type'].replace('_', ' ').title()}",
         f"Difficulty: {task['difficulty'].title()}",
@@ -235,7 +237,7 @@ def _format_task_content(
     if task.get('notes'):
         content_parts.extend([
             f"",
-            f"💡 Tips:",
+            f"Tips:",
             task['notes']
         ])
 

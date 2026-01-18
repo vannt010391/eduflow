@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Plan Adjustment Suggestions" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">
+                <i class="bi bi-lightbulb"></i>
+                {% trans "Plan Adjustment Suggestions" %}
+            </h3>
+            <small>{% trans "AI-generated suggestions to improve your study plan" %}</small>
+        </div>
+        <div class="card-body">
+            <!-- Filter Tabs -->
+            <ul class="nav nav-pills mb-3">
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}"
+                       href="?status=pending">
+                        {% trans "Pending" %}
+                        <span class="badge bg-light text-dark">{{ suggestions|length }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'accepted' %}active{% endif %}"
+                       href="?status=accepted">
+                        {% trans "Accepted" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'rejected' %}active{% endif %}"
+                       href="?status=rejected">
+                        {% trans "Rejected" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'all' %}active{% endif %}"
+                       href="?status=all">
+                        {% trans "All" %}
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Suggestions List -->
+            {% if suggestions %}
+            <div class="list-group">
+                {% for suggestion in suggestions %}
+                <a href="{% url 'adjustment_suggestion_detail' suggestion.id %}"
+                   class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">
+                                {% if suggestion.status == 'pending' %}
+                                <i class="bi bi-clock text-warning"></i>
+                                {% elif suggestion.status == 'accepted' %}
+                                <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                                {{ suggestion.event.title }}
+                            </h5>
+                            <p class="mb-1">
+                                <strong>{% trans "Triggered by:" %}</strong>
+                                {{ suggestion.triggered_by|title }}
+                            </p>
+                            <p class="mb-1 text-muted small">
+                                <i class="bi bi-calendar"></i>
+                                {{ suggestion.triggered_at|date:"SHORT_DATETIME_FORMAT" }}
+                            </p>
+                            <p class="mb-0">
+                                <span class="badge bg-info">
+                                    {{ suggestion.adjustment_count }}
+                                    {% trans "adjustments" %}
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            {% if suggestion.status == 'pending' %}
+                            <span class="badge bg-warning text-dark fs-6">{% trans "Pending" %}</span>
+                            {% elif suggestion.status == 'accepted' %}
+                            <span class="badge bg-success fs-6">{% trans "Accepted" %}</span>
+                            {% elif suggestion.status == 'rejected' %}
+                            <span class="badge bg-danger fs-6">{% trans "Rejected" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                {% if status_filter == 'pending' %}
+                {% trans "No pending suggestions. The AI will create suggestions based on your diagnostic tests and emotional state." %}
+                {% elif status_filter == 'accepted' %}
+                {% trans "No accepted suggestions yet." %}
+                {% elif status_filter == 'rejected' %}
+                {% trans "No rejected suggestions yet." %}
+                {% else %}
+                {% trans "No suggestions yet." %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            {% trans "Back to Dashboard" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

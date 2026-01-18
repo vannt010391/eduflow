@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Add Question" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-question-circle"></i>
+                        {% trans "Add Question to Test" %}
+                    </h4>
+                    <small>{{ test.title }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="question_number" class="form-label fw-bold">{% trans "Question Number" %}</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="question_number"
+                                name="question_number"
+                                value="{{ next_question_number }}"
+                                min="1"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="question_text" class="form-label fw-bold">{% trans "Question Text" %}</label>
+                            <textarea
+                                class="form-control"
+                                id="question_text"
+                                name="question_text"
+                                rows="3"
+                                required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="correct_answer" class="form-label fw-bold text-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    {% trans "Correct Answer" %}
+                                </label>
+                                <textarea
+                                    class="form-control"
+                                    id="correct_answer"
+                                    name="correct_answer"
+                                    rows="2"
+                                    required></textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="user_answer" class="form-label fw-bold text-danger">
+                                    <i class="bi bi-x-circle"></i>
+                                    {% trans "Your Answer" %}
+                                </label>
+                                <textarea
+                                    class="form-control"
+                                    id="user_answer"
+                                    name="user_answer"
+                                    rows="2"
+                                    required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="topic" class="form-label fw-bold">{% trans "Topic/Category" %}</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="topic"
+                                    name="topic"
+                                    placeholder="e.g., Dynamics, Algebra, Grammar">
+                                <div class="form-text">{% trans "Optional - helps group errors by topic" %}</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="error_type" class="form-label fw-bold">{% trans "Error Type" %}</label>
+                                <select class="form-select" id="error_type" name="error_type">
+                                    <option value="">{% trans "Select error type..." %}</option>
+                                    {% for value, label in error_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">{% trans "Optional - type of mistake made" %}</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="add_another" class="btn btn-success btn-lg">
+                                <i class="bi bi-plus-circle"></i>
+                                {% trans "Add & Add Another" %}
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2"></i>
+                                {% trans "Add & View Test" %}
+                            </button>
+                            <a href="{% url 'diagnostic_detail' test.id %}" class="btn btn-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Tips" %}</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small">
+                        <li>{% trans "Enter the question exactly as it appeared" %}</li>
+                        <li>{% trans "Correct answer should be the model answer" %}</li>
+                        <li>{% trans "Your answer should be what you actually wrote" %}</li>
+                        <li>{% trans "Topics help AI identify weak areas" %}</li>
+                        <li>{% trans "Error type helps understand mistake patterns" %}</li>
+                    </ul>
+
+                    <div class="alert alert-info small mt-3">
+                        <strong>{% trans "Current progress:" %}</strong><br>
+                        {% trans "Questions added:" %} {{ test.total_questions }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

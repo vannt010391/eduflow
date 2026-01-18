@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import FocusSession, BreakSession, FocusModel, UserPreference
 from .utils import get_break_recommendation, check_overload_alert, get_consecutive_sessions
+from study_sessions.models import StudySession
 
 @login_required
 def focus_timer(request):
@@ -32,6 +33,9 @@ def focus_timer(request):
     )
     daily_minutes = sum(s.duration_minutes or 0 for s in today_sessions)
 
+    # Calculate hours correctly
+    daily_hours = daily_minutes / 60.0
+
     # Check for overload
     overload_status = check_overload_alert(request.user)
 
@@ -40,6 +44,7 @@ def focus_timer(request):
         'preference': preference,
         'active_session': active_session,
         'daily_minutes': daily_minutes,
+        'daily_hours': daily_hours,
         'overload_status': overload_status,
     }
 
@@ -50,6 +55,7 @@ def start_focus_session(request):
     """Start a new focus session"""
     if request.method == 'POST':
         model_id = request.POST.get('focus_model')
+        study_session_id = request.POST.get('study_session_id')
 
         if model_id:
             focus_model = get_object_or_404(FocusModel, id=model_id)
@@ -69,14 +75,41 @@ def start_focus_session(request):
             messages.warning(request, 'You already have an active focus session.')
             return redirect('focus_timer')
 
+        # Link to study session if provided
+        study_session = None
+        if study_session_id:
+            try:
+                study_session = StudySession.objects.get(
+                    id=study_session_id,
+                    event__user=request.user
+                )
+                # Update study session status
+                if not study_session.actual_start_time:
+                    study_session.actual_start_time = timezone.now()
+                    study_session.status = 'in_progress'
+                    study_session.save()
+            except StudySession.DoesNotExist:
+                pass
+
         # Create new focus session
         session = FocusSession.objects.create(
             user=request.user,
             focus_model=focus_model,
+            study_session=study_session,
             start_time=timezone.now()
         )
 
-        messages.success(request, f'Focus session started! Stay focused for {focus_model.focus_duration} minutes.')
+        if study_session:
+            messages.success(
+                request,
+                f'Focus session started for "{study_session.event.title}"! '
+                f'Stay focused for {focus_model.focus_duration} minutes.'
+            )
+        else:
+            messages.success(
+                request,
+                f'Focus session started! Stay focused for {focus_model.focus_duration} minutes.'
+            )
         return redirect('focus_timer')
 
     return redirect('focus_timer')
@@ -91,6 +124,40 @@ def end_focus_session(request, pk):
         session.duration_minutes = session.calculate_duration()
         session.completed = True
         session.save()
+
+        # Update linked study session if exists
+        if session.study_session:
+            study_session = session.study_session
+
+            # Calculate total focus time from all linked focus sessions
+            total_focus_minutes = sum(
+                fs.duration_minutes or 0
+                for fs in study_session.focus_sessions.filter(completed=True)
+            )
+
+            # Update actual duration
+            study_session.actual_duration_minutes = total_focus_minutes
+            study_session.actual_end_time = timezone.now()
+
+            # Auto-complete if total time meets or exceeds target
+            if total_focus_minutes >= study_session.duration_minutes:
+                study_session.status = 'completed'
+                messages.info(
+                    request,
+                    f'Study session "{study_session.event.title}" completed! '
+                    f'Total time: {total_focus_minutes}/{study_session.duration_minutes} minutes.'
+                )
+            else:
+                # Keep in progress if more time needed
+                study_session.status = 'in_progress'
+                remaining = study_session.duration_minutes - total_focus_minutes
+                messages.info(
+                    request,
+                    f'Progress: {total_focus_minutes}/{study_session.duration_minutes} minutes. '
+                    f'{remaining} minutes remaining.'
+                )
+
+            study_session.save()
 
         # Get break recommendation
         consecutive = get_consecutive_sessions(request.user)

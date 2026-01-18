@@ -1,3 +1,29 @@
+# Core Django Framework
 Django==4.2.7
+
+# Environment Variables
+python-dotenv==1.2.1
+
+# Forms & UI
 django-crispy-forms==2.1
 crispy-bootstrap4==2024.1
+
+# AI Providers (Optional - only install if using real AI)
+# Uncomment the provider you want to use:
+# openai>=1.0.0              # For OpenAI GPT-4/GPT-3.5
+anthropic>=0.18.0          # For Anthropic Claude (ENABLED)
+
+# Phase 3: PDF Processing
+PyPDF2>=3.0.0              # For diagnostic test PDF parsing
+
+# Database
+# SQLite is built into Python, no additional package needed
+
+# Python Standard Library Dependencies
+# (These are built-in, listed here for documentation)
+# - json
+# - logging
+# - typing
+# - datetime
+# - os
+# - sys

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from .models import Event
 from .forms import EventForm
 from study_sessions.models import StudySession
+from ai.event_integration import generate_ai_study_sessions
 
 @login_required
 def event_list(request):
@@ -23,12 +24,20 @@ def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk, user=request.user)
     study_sessions = event.study_sessions.all()
 
+    # Phase 3: Check for diagnostic test
+    from diagnostics.models import DiagnosticTest
+    try:
+        diagnostic_test = DiagnosticTest.objects.get(event=event, user=request.user)
+    except DiagnosticTest.DoesNotExist:
+        diagnostic_test = None
+
     context = {
         'event': event,
         'study_sessions': study_sessions,
         'completion': event.completion_percentage(),
         'days_remaining': event.days_until_event(),
-        'at_risk': event.is_at_risk()
+        'at_risk': event.is_at_risk(),
+        'diagnostic_test': diagnostic_test,
     }
 
     return render(request, 'events/event_detail.html', context)
@@ -36,7 +45,7 @@ def event_detail(request, pk):
 @login_required
 def event_create(request):
     if request.method == 'POST':
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
             event.user = request.user
@@ -45,7 +54,23 @@ def event_create(request):
             # Generate study sessions automatically
             generate_study_sessions(event)
 
-            messages.success(request, f'Event "{event.title}" created successfully with auto-generated study sessions!')
+            # Phase 3: Create diagnostic test if file uploaded
+            diagnostic_file = form.cleaned_data.get('diagnostic_file')
+            if diagnostic_file:
+                from diagnostics.models import DiagnosticTest
+                diagnostic_test = DiagnosticTest.objects.create(
+                    user=request.user,
+                    event=event,
+                    title=f"Diagnostic Test - {event.title}",
+                    uploaded_file=diagnostic_file
+                )
+                messages.success(request,
+                    f'Event "{event.title}" created with study sessions and diagnostic test uploaded! '
+                    f'Add questions to your diagnostic test to analyze it.'
+                )
+            else:
+                messages.success(request, f'Event "{event.title}" created successfully with auto-generated study sessions!')
+
             return redirect('event_detail', pk=event.pk)
     else:
         form = EventForm()
@@ -83,12 +108,36 @@ def event_delete(request, pk):
     return render(request, 'events/event_confirm_delete.html', {'event': event})
 
 def generate_study_sessions(event):
-    """Generate study sessions based on event preparation time and available days"""
+    """
+    Generate study sessions using AI or fallback to deterministic method.
+
+    This function tries to use AI to generate intelligent study sessions.
+    If AI fails or is disabled, it falls back to the deterministic method.
+    """
+    # Try AI-powered session generation first
+    ai_sessions = generate_ai_study_sessions(event, force_regenerate=True)
+
+    if ai_sessions and len(ai_sessions) > 0:
+        # AI successfully generated sessions
+        return ai_sessions
+
+    # Fallback to deterministic method if AI fails or is disabled
+    return _generate_deterministic_sessions(event)
+
+
+def _generate_deterministic_sessions(event):
+    """
+    Fallback: Generate study sessions using deterministic logic.
+
+    This is the original method used when AI is unavailable.
+    """
     # Calculate days until event
     days_until = (event.event_date.date() - timezone.now().date()).days
 
+    # If event is in the past or today, create sessions for future dates anyway
+    # This ensures study sessions are always created
     if days_until <= 0:
-        return
+        days_until = 7  # Default to 7 days for planning
 
     # Convert prep time from hours to minutes
     total_prep_minutes = int(event.estimated_prep_time * 60)
@@ -111,6 +160,8 @@ def generate_study_sessions(event):
     session_count = 0
     default_start_time = timezone.datetime.strptime('18:00', '%H:%M').time()
 
+    sessions = []
+
     for day in range(days_until):
         if session_count >= num_sessions:
             break
@@ -128,7 +179,7 @@ def generate_study_sessions(event):
                 timedelta(hours=hour_offset)
             ).time()
 
-            StudySession.objects.create(
+            session = StudySession.objects.create(
                 event=event,
                 date=session_date,
                 start_time=start_time,
@@ -137,4 +188,7 @@ def generate_study_sessions(event):
                 status='pending'
             )
 
+            sessions.append(session)
             session_count += 1
+
+    return sessions

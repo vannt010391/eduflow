@@ -1,0 +1,56 @@
+Collecting anthropic
+  Obtaining dependency information for anthropic from https://files.pythonhosted.org/packages/e5/70/7b0fd9c1a738f59d3babe2b4212031c34ab7d0fda4ffef15b58a55c5bcea/anthropic-0.76.0-py3-none-any.whl.metadata
+  Downloading anthropic-0.76.0-py3-none-any.whl.metadata (28 kB)
+Requirement already satisfied: anyio<5,>=3.5.0 in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from anthropic) (4.4.0)
+Collecting distro<2,>=1.7.0 (from anthropic)
+  Obtaining dependency information for distro<2,>=1.7.0 from https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl.metadata
+  Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting docstring-parser<1,>=0.15 (from anthropic)
+  Obtaining dependency information for docstring-parser<1,>=0.15 from https://files.pythonhosted.org/packages/55/e2/2537ebcff11c1ee1ff17d8d0b6f4db75873e3b0fb32c2d4a2ee31ecb310a/docstring_parser-0.17.0-py3-none-any.whl.metadata
+  Downloading docstring_parser-0.17.0-py3-none-any.whl.metadata (3.5 kB)
+Requirement already satisfied: httpx<1,>=0.25.0 in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from anthropic) (0.27.0)
+Collecting jiter<1,>=0.4.0 (from anthropic)
+  Obtaining dependency information for jiter<1,>=0.4.0 from https://files.pythonhosted.org/packages/bb/60/1032b30ae0572196b0de0e87dce3b6c26a1eff71aad5fe43dee3082d32e0/jiter-0.12.0-cp311-cp311-win_amd64.whl.metadata
+  Downloading jiter-0.12.0-cp311-cp311-win_amd64.whl.metadata (5.3 kB)
+Collecting pydantic<3,>=1.9.0 (from anthropic)
+  Obtaining dependency information for pydantic<3,>=1.9.0 from https://files.pythonhosted.org/packages/5a/87/b70ad306ebb6f9b585f114d0ac2137d792b48be34d732d60e597c2f8465a/pydantic-2.12.5-py3-none-any.whl.metadata
+  Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+     ---------------------------------------- 90.6/90.6 kB 1.7 MB/s eta 0:00:00
+Requirement already satisfied: sniffio in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from anthropic) (1.3.1)
+Requirement already satisfied: typing-extensions<5,>=4.10 in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from anthropic) (4.12.2)
+Requirement already satisfied: idna>=2.8 in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from anyio<5,>=3.5.0->anthropic) (3.10)
+Requirement already satisfied: certifi in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from httpx<1,>=0.25.0->anthropic) (2024.8.30)
+Requirement already satisfied: httpcore==1.* in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from httpx<1,>=0.25.0->anthropic) (1.0.5)
+Requirement already satisfied: h11<0.15,>=0.13 in c:\users\admin\appdata\local\programs\python\python311\lib\site-packages (from httpcore==1.*->httpx<1,>=0.25.0->anthropic) (0.14.0)
+Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->anthropic)
+  Obtaining dependency information for annotated-types>=0.6.0 from https://files.pythonhosted.org/packages/78/b6/6307fbef88d9b5ee7421e68d78a9f162e0da4900bc5f5793f6d3d0e34fb8/annotated_types-0.7.0-py3-none-any.whl.metadata
+  Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.41.5 (from pydantic<3,>=1.9.0->anthropic)
+  Obtaining dependency information for pydantic-core==2.41.5 from https://files.pythonhosted.org/packages/11/66/f14d1d978ea94d1bc21fc98fcf570f9542fe55bfcc40269d4e1a21c19bf7/pydantic_core-2.41.5-cp311-cp311-win_amd64.whl.metadata
+  Downloading pydantic_core-2.41.5-cp311-cp311-win_amd64.whl.metadata (7.4 kB)
+Collecting typing-extensions<5,>=4.10 (from anthropic)
+  Obtaining dependency information for typing-extensions<5,>=4.10 from https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl.metadata
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic<3,>=1.9.0->anthropic)
+  Obtaining dependency information for typing-inspection>=0.4.2 from https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl.metadata
+  Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Downloading anthropic-0.76.0-py3-none-any.whl (390 kB)
+   -------------------------------------- 390.3/390.3 kB 936.1 kB/s eta 0:00:00
+Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+Downloading docstring_parser-0.17.0-py3-none-any.whl (36 kB)
+Downloading jiter-0.12.0-cp311-cp311-win_amd64.whl (204 kB)
+   -------------------------------------- 204.9/204.9 kB 828.3 kB/s eta 0:00:00
+Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+   ---------------------------------------- 463.6/463.6 kB 1.3 MB/s eta 0:00:00
+Downloading pydantic_core-2.41.5-cp311-cp311-win_amd64.whl (2.0 MB)
+   ---------------------------------------- 2.0/2.0 MB 1.9 MB/s eta 0:00:00
+Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+   ---------------------------------------- 44.6/44.6 kB 2.1 MB/s eta 0:00:00
+Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Installing collected packages: typing-extensions, jiter, docstring-parser, distro, annotated-types, typing-inspection, pydantic-core, pydantic, anthropic
+  Attempting uninstall: typing-extensions
+    Found existing installation: typing_extensions 4.12.2
+    Uninstalling typing_extensions-4.12.2:
+      Successfully uninstalled typing_extensions-4.12.2
+Successfully installed annotated-types-0.7.0 anthropic-0.76.0 distro-1.9.0 docstring-parser-0.17.0 jiter-0.12.0 pydantic-2.12.5 pydantic-core-2.41.5 typing-extensions-4.15.0 typing-inspection-0.4.2
