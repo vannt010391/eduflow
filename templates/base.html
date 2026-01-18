@@ -5,6 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>{% block title %}EduFlow AI{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
@@ -13,6 +16,27 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Language form styling */
+        .language-form {
+            margin: 0;
+            padding: 0;
+        }
+        .language-form button {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        .language-form button:hover {
+            background-color: #f8f9fa;
+        }
+        .language-form button.active {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -54,25 +78,55 @@
                             <i class="bi bi-graph-up"></i> {% trans "Analytics" %}
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="aiDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-stars"></i> {% trans "AI Features" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'emotional_state_prompt' %}">
+                                    <i class="bi bi-emoji-smile"></i> {% trans "Log Emotional State" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'adjustment_suggestions_list' %}">
+                                    <i class="bi bi-lightbulb"></i> {% trans "Plan Suggestions" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
+                        {% get_current_language as CURRENT_LANG %}
                         <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-globe"></i> {% trans "Language" %}
+                            <i class="bi bi-globe"></i>
+                            {% if CURRENT_LANG == 'vi' %}
+                                Tiếng Việt
+                            {% else %}
+                                English
+                            {% endif %}
+                            <span class="badge bg-light text-dark ms-1">{{ CURRENT_LANG }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <form action="{% url 'set_language' %}" method="post" class="language-form">
+                                <form action="/i18n/setlang/" method="post" class="language-form" style="display: inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="language" value="en">
-                                    <button type="submit" class="dropdown-item">English</button>
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button type="submit" class="dropdown-item {% if CURRENT_LANG == 'en' %}active{% endif %}">
+                                        {% if CURRENT_LANG == 'en' %}<i class="bi bi-check-circle-fill"></i>{% endif %} English
+                                    </button>
                                 </form>
                             </li>
                             <li>
-                                <form action="{% url 'set_language' %}" method="post" class="language-form">
+                                <form action="/i18n/setlang/" method="post" class="language-form" style="display: inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="language" value="vi">
-                                    <button type="submit" class="dropdown-item">Tiếng Việt</button>
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button type="submit" class="dropdown-item {% if CURRENT_LANG == 'vi' %}active{% endif %}">
+                                        {% if CURRENT_LANG == 'vi' %}<i class="bi bi-check-circle-fill"></i>{% endif %} Tiếng Việt
+                                    </button>
                                 </form>
                             </li>
                         </ul>
@@ -120,6 +174,113 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Phase 3: Emotional State Modal (Auto-prompt) -->
+    {% if user.is_authenticated and show_emotional_prompt %}
+    <div class="modal fade" id="emotionalStateModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-emoji-smile"></i>
+                        {% trans "How are you feeling today?" %}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="{% url 'emotional_state_submit' %}" id="emotionalStateForm">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">
+                            {% trans "Help us optimize your study plan for today by sharing how you're feeling." %}
+                        </p>
+
+                        <!-- Energy Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-lightning-charge"></i>
+                                {% trans "Energy Level" %}
+                            </label>
+                            <small class="d-block text-muted mb-2">{% trans "How much physical/mental energy do you have?" %}</small>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_low_modal" value="low" required>
+                                <label class="btn btn-outline-danger" for="energy_low_modal">{% trans "Low" %}</label>
+
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_medium_modal" value="medium" checked>
+                                <label class="btn btn-outline-warning" for="energy_medium_modal">{% trans "Medium" %}</label>
+
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_high_modal" value="high">
+                                <label class="btn btn-outline-success" for="energy_high_modal">{% trans "High" %}</label>
+                            </div>
+                        </div>
+
+                        <!-- Stress Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-thermometer-half"></i>
+                                {% trans "Stress Level" %}
+                            </label>
+                            <small class="d-block text-muted mb-2">{% trans "How stressed do you feel about studying?" %}</small>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_low_modal" value="low" checked>
+                                <label class="btn btn-outline-success" for="stress_low_modal">{% trans "Low" %}</label>
+
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_medium_modal" value="medium">
+                                <label class="btn btn-outline-warning" for="stress_medium_modal">{% trans "Medium" %}</label>
+
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_high_modal" value="high">
+                                <label class="btn btn-outline-danger" for="stress_high_modal">{% trans "High" %}</label>
+                            </div>
+                        </div>
+
+                        <!-- Focus Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-eye"></i>
+                                {% trans "Focus Level" %}
+                            </label>
+                            <small class="d-block text-muted mb-2">{% trans "How well can you concentrate today?" %}</small>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_low_modal" value="low">
+                                <label class="btn btn-outline-danger" for="focus_low_modal">{% trans "Low" %}</label>
+
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_medium_modal" value="medium" checked>
+                                <label class="btn btn-outline-warning" for="focus_medium_modal">{% trans "Medium" %}</label>
+
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_high_modal" value="high">
+                                <label class="btn btn-outline-success" for="focus_high_modal">{% trans "High" %}</label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info small">
+                            <i class="bi bi-shield-check"></i>
+                            {% trans "Your data is private and only used to optimize your study sessions for today." %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            {% trans "Skip for Now" %}
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            {% trans "Submit & Optimize" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-show modal on page load if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            var emotionalModal = document.getElementById('emotionalStateModal');
+            if (emotionalModal) {
+                var modal = new bootstrap.Modal(emotionalModal);
+                modal.show();
+            }
+        });
+    </script>
+    {% endif %}
+
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
@@ -131,6 +292,39 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- Language Switch Script - Let Django Handle It Properly -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Log current language info on page load
+            console.log('=== PAGE LOADED ===');
+            console.log('URL:', window.location.href);
+            const langCookie = document.cookie.split('; ').find(row => row.startsWith('django_language'));
+            console.log('Language cookie:', langCookie);
+
+            // Add event listeners to language forms
+            const languageForms = document.querySelectorAll('.language-form');
+            languageForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const language = form.querySelector('input[name="language"]').value;
+                    console.log('=== LANGUAGE SWITCH ===');
+                    console.log('Switching to:', language);
+
+                    // Update the "next" field to add cache-busting parameter
+                    const nextInput = form.querySelector('input[name="next"]');
+                    const currentPath = nextInput.value.split('?')[0];  // Remove any existing query params
+                    const timestamp = new Date().getTime();
+                    nextInput.value = currentPath + '?nocache=' + timestamp;
+
+                    console.log('Next URL will be:', nextInput.value);
+                    console.log('Submitting form to Django setlang view...');
+
+                    // Let form submit naturally - Django will handle cookie and redirect
+                    // Don't prevent default!
+                });
+            });
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

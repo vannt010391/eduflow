@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)-x%yht6mxh#j@#sy&9=%#-qptn#6lt)r)deriu9hnkgm#x#_x'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-)-x%yht6mxh#j@#sy&9=%#-qptn#6lt)r)deriu9hnkgm#x#_x')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -44,11 +49,15 @@ INSTALLED_APPS = [
     'study_sessions',
     'focus_break',
     'analytics',
+    # Phase 3: AI-Enhanced Learning Orchestration
+    'emotional_state',
+    'diagnostics',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'eduflow_ai.middleware.ClearSessionLanguageMiddleware',  # Clear session language - use cookie only
     'django.middleware.locale.LocaleMiddleware',  # Language middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -68,8 +77,11 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Phase 3: Auto-prompt emotional state
+                'emotional_state.context_processors.emotional_state_prompt',
             ],
         },
     },
@@ -128,6 +140,15 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 year
+LANGUAGE_COOKIE_DOMAIN = None
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_SECURE = False  # Set to True in production with HTTPS
+LANGUAGE_COOKIE_HTTPONLY = False
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -153,13 +174,13 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # AI Configuration
-# Set AI_ENABLED = True when you have an API key configured
-AI_ENABLED = True  # Set to True to enable AI features
-AI_PROVIDER = 'mock'  # Options: 'mock', 'openai', 'anthropic'
-AI_API_KEY = None  # Set your API key here or use environment variable
-AI_MODEL = 'gpt-4'  # For OpenAI: 'gpt-4', 'gpt-3.5-turbo'; For Anthropic: 'claude-3-opus-20240229'
+# These settings are now loaded from .env file for better security
+AI_ENABLED = os.environ.get('AI_ENABLED', 'True') == 'True'
+AI_PROVIDER = os.environ.get('AI_PROVIDER', 'mock')  # Options: 'mock', 'openai', 'anthropic'
+AI_API_KEY = os.environ.get('AI_API_KEY')  # Load from .env file
+AI_MODEL = os.environ.get('AI_MODEL', 'gpt-4')  # For OpenAI: 'gpt-4', 'gpt-3.5-turbo'; For Anthropic: 'claude-3-5-sonnet-20241022'
 
-# You can also use environment variables for security:
-# import os
-# AI_API_KEY = os.environ.get('AI_API_KEY')
-# AI_ENABLED = os.environ.get('AI_ENABLED', 'False') == 'True'
+# Advanced AI settings (optional)
+AI_TIMEOUT = int(os.environ.get('AI_TIMEOUT', '30'))  # API timeout in seconds
+AI_MAX_RETRIES = int(os.environ.get('AI_MAX_RETRIES', '3'))  # Max retry attempts
+AI_RETRY_DELAY = int(os.environ.get('AI_RETRY_DELAY', '2'))  # Delay between retries in seconds

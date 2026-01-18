@@ -38,10 +38,51 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card mb-3">
             <div class="card-body text-center">
                 <h2 class="text-primary">{{ days_remaining }}</h2>
                 <p class="mb-0">Days Remaining</p>
+            </div>
+        </div>
+
+        <!-- Phase 3: Diagnostic Test -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clipboard-check"></i>
+                    Diagnostic Test
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if diagnostic_test %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i>
+                    <strong>Test uploaded:</strong> {{ diagnostic_test.title }}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h5 class="mb-0">{{ diagnostic_test.score_percentage }}%</h5>
+                        <small class="text-muted">{{ diagnostic_test.correct_count }}/{{ diagnostic_test.total_questions }} correct</small>
+                    </div>
+                    <div>
+                        {% if diagnostic_test.is_analyzed %}
+                        <span class="badge bg-success">Analyzed</span>
+                        {% else %}
+                        <span class="badge bg-warning">Not Analyzed</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'diagnostic_detail' diagnostic_test.id %}" class="btn btn-info btn-sm w-100">
+                    <i class="bi bi-eye"></i>
+                    View Test Details
+                </a>
+                {% else %}
+                <p class="text-muted">Upload a diagnostic test to identify your weak areas and get personalized review suggestions.</p>
+                <a href="{% url 'diagnostic_upload' event.id %}" class="btn btn-primary w-100">
+                    <i class="bi bi-upload"></i>
+                    Upload Diagnostic Test
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -89,12 +130,18 @@
                             </div>
                             <div class="btn-group-vertical" role="group">
                                 {% if session.status == 'pending' %}
-                                <a href="{% url 'session_start' session.pk %}" class="btn btn-sm btn-success">Start</a>
-                                <a href="{% url 'session_skip' session.pk %}" class="btn btn-sm btn-warning">Skip</a>
+                                <form method="post" action="{% url 'start_focus_session' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="study_session_id" value="{{ session.pk }}">
+                                    <button type="submit" class="btn btn-sm btn-success w-100">
+                                        <i class="bi bi-stopwatch"></i> Start with Timer
+                                    </button>
+                                </form>
+                                <a href="{% url 'session_skip' session.pk %}" class="btn btn-sm btn-warning mt-1">Skip</a>
                                 {% elif session.status == 'in_progress' %}
                                 <a href="{% url 'session_complete' session.pk %}" class="btn btn-sm btn-primary">Complete</a>
                                 {% endif %}
-                                <a href="{% url 'study_session_detail' session.pk %}" class="btn btn-sm btn-outline-info">Details</a>
+                                <a href="{% url 'study_session_detail' session.pk %}" class="btn btn-sm btn-outline-info mt-1">Details</a>
                             </div>
                         </div>
                     </div>

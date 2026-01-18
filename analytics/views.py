@@ -6,6 +6,8 @@ from datetime import timedelta
 from events.models import Event
 from study_sessions.models import StudySession
 from focus_break.models import FocusSession
+from emotional_state.models import EmotionalStateLog
+from diagnostics.models import PlanAdjustmentSuggestion
 
 @login_required
 def analytics_dashboard(request):
@@ -92,6 +94,17 @@ def analytics_dashboard(request):
         duration_minutes__gt=90
     ).count()
 
+    # Phase 3: Emotional state
+    last_emotional_log = EmotionalStateLog.objects.filter(
+        user=user
+    ).order_by('-timestamp').first()
+
+    # Phase 3: Plan adjustment suggestions
+    pending_suggestions_count = PlanAdjustmentSuggestion.objects.filter(
+        user=user,
+        status='pending'
+    ).count()
+
     context = {
         # Today
         'today_completed': today_completed,
@@ -129,6 +142,10 @@ def analytics_dashboard(request):
             [day.strftime('%a') for day in reversed(last_7_days)],
             list(reversed(daily_study_times))
         )),
+
+        # Phase 3: Emotional state & suggestions
+        'last_emotional_log': last_emotional_log,
+        'pending_suggestions_count': pending_suggestions_count,
     }
 
     return render(request, 'analytics/dashboard.html', context)

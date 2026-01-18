@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Log Your Emotional State{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">How are you feeling today?</h4>
+                    <small>This helps us optimize your study plan</small>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'emotional_state_submit' %}">
+                        {% csrf_token %}
+
+                        <!-- Energy Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Energy Level</label>
+                            <p class="text-muted small">How much physical/mental energy do you have?</p>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_low" value="low" required>
+                                <label class="btn btn-outline-danger" for="energy_low">Low</label>
+
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_medium" value="medium" checked>
+                                <label class="btn btn-outline-warning" for="energy_medium">Medium</label>
+
+                                <input type="radio" class="btn-check" name="energy_level" id="energy_high" value="high">
+                                <label class="btn btn-outline-success" for="energy_high">High</label>
+                            </div>
+                        </div>
+
+                        <!-- Stress Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Stress Level</label>
+                            <p class="text-muted small">How stressed do you feel about studying?</p>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_low" value="low" checked>
+                                <label class="btn btn-outline-success" for="stress_low">Low</label>
+
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_medium" value="medium">
+                                <label class="btn btn-outline-warning" for="stress_medium">Medium</label>
+
+                                <input type="radio" class="btn-check" name="stress_level" id="stress_high" value="high">
+                                <label class="btn btn-outline-danger" for="stress_high">High</label>
+                            </div>
+                        </div>
+
+                        <!-- Focus Level -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Focus Level</label>
+                            <p class="text-muted small">How well can you concentrate right now?</p>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_low" value="low">
+                                <label class="btn btn-outline-danger" for="focus_low">Low</label>
+
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_medium" value="medium" checked>
+                                <label class="btn btn-outline-warning" for="focus_medium">Medium</label>
+
+                                <input type="radio" class="btn-check" name="focus_level" id="focus_high" value="high">
+                                <label class="btn btn-outline-success" for="focus_high">High</label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Skip for Now</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted small">
+                    <i class="bi bi-shield-check"></i> Your data is private and only used to improve your study experience.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

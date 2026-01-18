@@ -23,15 +23,20 @@ Analyze the learning goal and create a structured learning plan that breaks it d
 
 ## CONSTRAINTS
 
-- Each task must be 25-60 minutes (prefer 25-45 minute tasks)
+- Each task must be 25-45 minutes (prefer shorter 25-30 minute focused tasks)
+- Break down large topics into multiple smaller tasks for better focus
+- Create AT LEAST 10 tasks for 6+ hours of prep time (more tasks = better balance)
+- For every hour of prep time, aim for 2-3 tasks minimum
 - Tasks must be independent and reorderable
 - No task dependencies or prerequisites
-- Total estimated time should approximately match {prep_time_hours} hours
+- Total estimated time should match {prep_time_hours} hours (±10%)
 - Tasks should follow educational best practices:
   - Start with concept review before practice
+  - Break down practice into specific subtopics
   - Include spaced repetition (revision tasks)
   - End with mock tests for exams/quizzes
   - Mix cognitive loads to prevent burnout
+  - Alternate between different task types
 
 ## TASK TYPES
 - concept_review: Learning new material, reading, watching lectures

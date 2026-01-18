@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load session_extras %}
 
 {% block title %}Study Session Detail - EduFlow AI{% endblock %}
 
@@ -15,12 +16,73 @@
                 <p>
                     <strong>Date:</strong> {{ session.date|date:"F d, Y" }}<br>
                     <strong>Time:</strong> {{ session.start_time|time:"g:i A" }}<br>
-                    <strong>Duration:</strong> {{ session.duration_minutes }} minutes<br>
+                    <strong>Target Duration:</strong> {{ session.duration_minutes }} minutes<br>
                     <strong>Status:</strong> <span class="badge bg-secondary">{{ session.get_status_display }}</span>
                 </p>
 
+                <!-- Focus Sessions Progress -->
+                {% if session.focus_sessions.exists %}
+                {% with total_focus_time=session.get_total_focus_time progress_percent=session.get_progress_percent %}
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-stopwatch"></i> Focus Timer Sessions</h6>
+                    <div class="progress mb-2" style="height: 25px;">
+                        <div class="progress-bar {% if session.is_target_reached %}bg-success{% else %}bg-primary{% endif %}"
+                             style="width: {{ progress_percent }}%">
+                            {{ total_focus_time }}/{{ session.duration_minutes }} min ({{ progress_percent }}%)
+                        </div>
+                    </div>
+
+                    <small class="text-muted">
+                        Completed {{ session.focus_sessions.filter.count }} focus session(s)
+                    </small>
+
+                    {% if session.is_target_reached %}
+                    <p class="mb-0 mt-2 text-success">
+                        <i class="bi bi-check-circle-fill"></i> Target time reached! Session will auto-complete.
+                    </p>
+                    {% else %}
+                    {% widthratio session.duration_minutes 1 1 as target %}
+                    {% widthratio total_focus_time 1 1 as current %}
+                    <p class="mb-0 mt-2">
+                        <i class="bi bi-info-circle"></i> Need {{ target|add:"-"|add:current }} more minutes to reach target.
+                    </p>
+                    {% endif %}
+                </div>
+                {% endwith %}
+                {% endif %}
+
+                <!-- Suggested Content -->
+                {% if session.suggested_content %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-book"></i> Study Guide</h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ session.suggested_content }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="btn-group w-100 mb-3" role="group">
+                    {% if session.status == 'pending' or session.status == 'in_progress' %}
+                    <form method="post" action="{% url 'start_focus_session' %}" style="flex: 1;">
+                        {% csrf_token %}
+                        <input type="hidden" name="study_session_id" value="{{ session.pk }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-stopwatch"></i> {% if session.status == 'pending' %}Start{% else %}Continue with{% endif %} Focus Timer
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if session.status == 'in_progress' %}
+                    <a href="{% url 'session_complete' session.pk %}" class="btn btn-primary" style="flex: 1;">
+                        <i class="bi bi-check-circle"></i> Mark Complete
+                    </a>
+                    {% endif %}
+                </div>
+
                 {% if session.actual_start_time %}
-                <p>
+                <p class="small text-muted">
                     <strong>Actual Start:</strong> {{ session.actual_start_time|date:"g:i A" }}<br>
                     {% if session.actual_end_time %}
                     <strong>Actual End:</strong> {{ session.actual_end_time|date:"g:i A" }}<br>

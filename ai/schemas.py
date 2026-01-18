@@ -130,3 +130,169 @@ def validate_learning_plan(plan: dict) -> bool:
             raise ValueError(f"Task {i} validation failed: {str(e)}")
 
     return True
+
+
+# ==================== Phase 3 Schemas ====================
+
+# Emotional state levels
+EmotionalLevel = Literal["low", "medium", "high"]
+
+# Error types for diagnostic questions
+ErrorType = Literal["conceptual", "application", "reasoning"]
+
+# Adjustment types for plan modifications
+AdjustmentType = Literal["shorten", "split", "reorder", "focus_mode_change"]
+
+
+class DiagnosticErrorGroup(TypedDict):
+    """
+    Schema for grouped diagnostic errors by topic.
+    """
+    topic: str
+    error_count: int
+    question_numbers: List[int]
+    error_types: List[ErrorType]
+    severity: Literal["low", "medium", "high"]
+
+
+class DiagnosticAnalysisResult(TypedDict):
+    """
+    Schema for AI analysis of diagnostic test.
+
+    AI Use Case #4: Diagnostic Test Analysis
+    Analyzes error patterns and identifies weak topics.
+    """
+    total_questions: int
+    correct_count: int
+    incorrect_count: int
+    score_percentage: int
+    error_groups: List[DiagnosticErrorGroup]
+    dominant_error_topic: Optional[str]
+    recommended_review_topics: List[str]
+    analysis_summary: str
+
+
+class EmotionalContext(TypedDict):
+    """
+    Context about user's emotional state for plan adjustments.
+    """
+    energy: EmotionalLevel
+    stress: EmotionalLevel
+    focus: EmotionalLevel
+    needs_attention: bool
+
+
+class PlanAdjustment(TypedDict):
+    """
+    A single adjustment to be made to the study plan.
+
+    Constraints:
+    - type: Must be one of the allowed adjustment types
+    - target: Specific session or task to modify
+    - new_duration_minutes: Only for shorten/split (25-60 minutes)
+    - new_focus_mode: Only for focus_mode_change
+    """
+    type: AdjustmentType
+    target: str  # Which session/task to adjust
+    new_duration_minutes: Optional[int]  # For shorten/split
+    new_focus_mode: Optional[str]  # For focus_mode_change
+
+
+class PlanAdjustmentResult(TypedDict):
+    """
+    Schema for AI-suggested plan adjustments.
+
+    AI Use Case #5: Plan Adjustment Based on Emotional State & Diagnostics
+    Suggests modifications to study plan based on user state and test results.
+
+    CRITICAL: Must include detailed rationale explaining why each adjustment
+    is suggested and how it addresses the detected issues.
+    """
+    triggered_by: str  # What triggered this suggestion
+    context: dict  # Contains emotional_state, diagnostic_results, etc.
+    adjustments: List[PlanAdjustment]
+    rationale: str  # MANDATORY: Detailed explanation of why these adjustments are needed
+
+
+def validate_diagnostic_analysis(analysis: dict) -> bool:
+    """
+    Validate diagnostic analysis output from AI.
+
+    Args:
+        analysis: Dictionary containing diagnostic analysis
+
+    Returns:
+        True if valid, raises ValueError otherwise
+    """
+    required_fields = ["total_questions", "correct_count", "incorrect_count",
+                      "score_percentage", "error_groups", "analysis_summary"]
+
+    for field in required_fields:
+        if field not in analysis:
+            raise ValueError(f"Missing required field: {field}")
+
+    # Validate score_percentage
+    if not (0 <= analysis["score_percentage"] <= 100):
+        raise ValueError(f"Invalid score_percentage: {analysis['score_percentage']}")
+
+    # Validate error_groups is a list
+    if not isinstance(analysis["error_groups"], list):
+        raise ValueError("error_groups must be a list")
+
+    # Validate each error group
+    for i, group in enumerate(analysis["error_groups"]):
+        if "topic" not in group or "error_count" not in group:
+            raise ValueError(f"Error group {i} missing required fields")
+
+        if group["error_count"] <= 0:
+            raise ValueError(f"Error group {i} has invalid error_count")
+
+    return True
+
+
+def validate_plan_adjustment(adjustment_result: dict) -> bool:
+    """
+    Validate plan adjustment suggestion from AI.
+
+    Args:
+        adjustment_result: Dictionary containing plan adjustment
+
+    Returns:
+        True if valid, raises ValueError otherwise
+    """
+    required_fields = ["triggered_by", "context", "adjustments", "rationale"]
+
+    for field in required_fields:
+        if field not in adjustment_result:
+            raise ValueError(f"Missing required field: {field}")
+
+    # CRITICAL: Rationale must not be empty
+    if not adjustment_result["rationale"] or len(adjustment_result["rationale"].strip()) < 10:
+        raise ValueError("Rationale is required and must be at least 10 characters")
+
+    # Validate adjustments is a list
+    if not isinstance(adjustment_result["adjustments"], list):
+        raise ValueError("adjustments must be a list")
+
+    if len(adjustment_result["adjustments"]) == 0:
+        raise ValueError("At least one adjustment must be specified")
+
+    # Validate each adjustment
+    valid_adjustment_types = ["shorten", "split", "reorder", "focus_mode_change"]
+    for i, adj in enumerate(adjustment_result["adjustments"]):
+        if "type" not in adj or "target" not in adj:
+            raise ValueError(f"Adjustment {i} missing required fields")
+
+        if adj["type"] not in valid_adjustment_types:
+            raise ValueError(f"Invalid adjustment type: {adj['type']}")
+
+        # Validate duration for shorten/split
+        if adj["type"] in ["shorten", "split"]:
+            if "new_duration_minutes" not in adj:
+                raise ValueError(f"Adjustment {i} of type {adj['type']} requires new_duration_minutes")
+
+            duration = adj["new_duration_minutes"]
+            if not isinstance(duration, int) or duration < 25 or duration > 60:
+                raise ValueError(f"Invalid duration for adjustment {i}: {duration}")
+
+    return True

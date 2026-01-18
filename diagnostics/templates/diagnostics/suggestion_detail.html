@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Plan Adjustment Suggestion" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Suggestion Header -->
+    <div class="card shadow mb-4">
+        <div class="card-header {% if suggestion.status == 'pending' %}bg-warning text-dark{% elif suggestion.status == 'accepted' %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">
+                        <i class="bi bi-lightbulb"></i>
+                        {% trans "Plan Adjustment Suggestion" %}
+                    </h3>
+                    <small>{% trans "For event:" %} {{ suggestion.event.title }}</small>
+                </div>
+                <div>
+                    {% if suggestion.status == 'pending' %}
+                    <span class="badge bg-light text-dark fs-5">{% trans "Pending Review" %}</span>
+                    {% elif suggestion.status == 'accepted' %}
+                    <span class="badge bg-light text-success fs-5">{% trans "Accepted" %}</span>
+                    {% elif suggestion.status == 'rejected' %}
+                    <span class="badge bg-light text-danger fs-5">{% trans "Rejected" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{% trans "Triggered by:" %}</strong> {{ suggestion.triggered_by|title }}</p>
+                    <p><strong>{% trans "Created:" %}</strong> {{ suggestion.triggered_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{% trans "Number of adjustments:" %}</strong> {{ suggestion.adjustment_count }}</p>
+                    {% if suggestion.reviewed_at %}
+                    <p><strong>{% trans "Reviewed:" %}</strong> {{ suggestion.reviewed_at|date:"SHORT_DATETIME_FORMAT" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle"></i>
+                {% trans "Context" %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if suggestion.context %}
+            <div class="row">
+                {% if suggestion.context.emotional_state %}
+                <div class="col-md-6 mb-3">
+                    <h6>{% trans "Emotional State:" %}</h6>
+                    <ul class="list-unstyled">
+                        <li>
+                            <i class="bi bi-lightning-charge"></i>
+                            {% trans "Energy:" %} <span class="badge bg-secondary">{{ suggestion.context.emotional_state.energy|title }}</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-thermometer-half"></i>
+                            {% trans "Stress:" %} <span class="badge bg-secondary">{{ suggestion.context.emotional_state.stress|title }}</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-eye"></i>
+                            {% trans "Focus:" %} <span class="badge bg-secondary">{{ suggestion.context.emotional_state.focus|title }}</span>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if suggestion.context.dominant_error_topic %}
+                <div class="col-md-6 mb-3">
+                    <h6>{% trans "Diagnostic Results:" %}</h6>
+                    <p>
+                        <strong>{% trans "Dominant error topic:" %}</strong>
+                        <span class="badge bg-danger">{{ suggestion.context.dominant_error_topic }}</span>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="text-muted">{% trans "No context information available." %}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Adjustments -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-gear"></i>
+                {% trans "Proposed Adjustments" %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if suggestion.adjustments %}
+            <div class="list-group">
+                {% for adjustment in suggestion.adjustments %}
+                <div class="list-group-item">
+                    <h6>
+                        {% if adjustment.type == 'shorten' %}
+                        <i class="bi bi-scissors text-warning"></i>
+                        {% trans "Shorten Session" %}
+                        {% elif adjustment.type == 'split' %}
+                        <i class="bi bi-distribute-vertical text-info"></i>
+                        {% trans "Split Session" %}
+                        {% elif adjustment.type == 'reorder' %}
+                        <i class="bi bi-arrow-down-up text-primary"></i>
+                        {% trans "Reorder Sessions" %}
+                        {% elif adjustment.type == 'focus_mode_change' %}
+                        <i class="bi bi-bullseye text-success"></i>
+                        {% trans "Change Focus Mode" %}
+                        {% else %}
+                        <i class="bi bi-gear"></i>
+                        {{ adjustment.type|title }}
+                        {% endif %}
+                    </h6>
+                    <p class="mb-1"><strong>{% trans "Target:" %}</strong> {{ adjustment.target }}</p>
+                    {% if adjustment.new_duration_minutes %}
+                    <p class="mb-0">
+                        <strong>{% trans "New duration:" %}</strong>
+                        {{ adjustment.new_duration_minutes }} {% trans "minutes" %}
+                    </p>
+                    {% endif %}
+                    {% if adjustment.new_focus_mode %}
+                    <p class="mb-0">
+                        <strong>{% trans "New focus mode:" %}</strong>
+                        {{ adjustment.new_focus_mode }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">{% trans "No adjustments specified." %}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Rationale -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-journal-text"></i>
+                {% trans "AI Rationale" %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-light border">
+                {{ suggestion.rationale|linebreaks }}
+            </div>
+        </div>
+    </div>
+
+    <!-- User Notes (if reviewed) -->
+    {% if suggestion.user_notes %}
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-chat-left-text"></i>
+                {% trans "Your Notes" %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <p>{{ suggestion.user_notes }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons (if pending) -->
+    {% if suggestion.status == 'pending' %}
+    <div class="card shadow mb-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="bi bi-hand-thumbs-up"></i>
+                {% trans "Review This Suggestion" %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <p>{% trans "Please review the suggested adjustments and decide whether to accept or reject them." %}</p>
+
+            <form method="post" action="{% url 'adjustment_accept' suggestion.id %}" class="mb-3">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="accept_notes" class="form-label">
+                        {% trans "Notes (optional)" %}
+                    </label>
+                    <textarea
+                        class="form-control"
+                        id="accept_notes"
+                        name="notes"
+                        rows="2"
+                        placeholder="{% trans 'Add any notes about accepting this suggestion...' %}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i>
+                    {% trans "Accept Adjustments" %}
+                </button>
+            </form>
+
+            <form method="post" action="{% url 'adjustment_reject' suggestion.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="reject_notes" class="form-label">
+                        {% trans "Reason for rejection (optional)" %}
+                    </label>
+                    <textarea
+                        class="form-control"
+                        id="reject_notes"
+                        name="notes"
+                        rows="2"
+                        placeholder="{% trans 'Why are you rejecting this suggestion?...' %}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i>
+                    {% trans "Reject Adjustments" %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{% url 'adjustment_suggestions_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            {% trans "Back to Suggestions" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

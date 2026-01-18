@@ -48,3 +48,21 @@ class StudySession(models.Model):
             delta = self.actual_end_time - self.actual_start_time
             return int(delta.total_seconds() / 60)
         return None
+
+    def get_total_focus_time(self):
+        """Calculate total time from all completed focus sessions"""
+        return sum(
+            fs.duration_minutes or 0
+            for fs in self.focus_sessions.filter(completed=True)
+        )
+
+    def get_progress_percent(self):
+        """Calculate progress percentage based on focus sessions"""
+        total_focus = self.get_total_focus_time()
+        if self.duration_minutes and self.duration_minutes > 0:
+            return min(100, int((total_focus / self.duration_minutes) * 100))
+        return 0
+
+    def is_target_reached(self):
+        """Check if total focus time meets or exceeds target duration"""
+        return self.get_total_focus_time() >= self.duration_minutes
