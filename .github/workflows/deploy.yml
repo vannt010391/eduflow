@@ -1,0 +1,107 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to Ubuntu Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /opt/eduflow
+          git fetch origin
+          git checkout feature/update-function
+          git pull origin feature/update-function
+          
+          # Activate virtual environment
+          source venv/bin/activate
+          
+          # Install/update dependencies
+          pip install -r requirements.txt
+          
+          # Run migrations
+          python manage.py migrate
+          
+          # Collect static files
+          python manage.py collectstatic --noinput
+          
+          # Restart services
+          sudo systemctl restart eduflow.service
+          sudo systemctl restart nginx
+          
+          echo "Deployment completed successfully!"
+
+    - name: Notify Slack on Success
+      if: success()
+      uses: slackapi/slack-github-action@v1.24.0
+      with:
+        webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+        payload: |
+          {
+            "text": "✅ Deployment Successful",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Eduflow Deployment*\n✅ Successfully deployed to production\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
+                }
+              }
+            ]
+          }
+
+    - name: Notify Slack on Failure
+      if: failure()
+      uses: slackapi/slack-github-action@v1.24.0
+      with:
+        webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+        payload: |
+          {
+            "text": "❌ Deployment Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Eduflow Deployment*\n❌ Deployment failed\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}"
+                }
+              }
+            ]
+          }
+
+  docker-deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy with Docker Compose
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /opt/eduflow
+          docker-compose pull
+          docker-compose up -d
+          docker-compose exec -T web python manage.py migrate
+          docker-compose exec -T web python manage.py collectstatic --noinput
+          
+          echo "Docker deployment completed!"
+      if: ${{ secrets.USE_DOCKER == 'true' }}
